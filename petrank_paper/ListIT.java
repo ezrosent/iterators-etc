@@ -1,4 +1,6 @@
 import java.util.concurrent.atomic.*;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ListIT {
 
@@ -192,6 +194,18 @@ public class ListIT {
 			result++;
 		}
 		return result;
+	}
+	
+	// iterator: calculates the nodes in the list via iteration
+	public List<Integer> iterate(int tid) {
+	    List<Integer> list = new ArrayList<Integer>();
+	    
+	    SnapCollector<Node> snap = GetSnapshot(tid);
+		Node curr;
+		while ((curr = snap.GetNext(tid)) != null) {
+			list.add(curr.key);
+		}
+	    return list;
 	}
 
 }
