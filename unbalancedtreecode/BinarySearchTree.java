@@ -73,6 +73,7 @@ public class BinarySearchTree
 	
 	public boolean insert(int key)
 	{
+		
 		while (true)
 		{
 			SeekRecord seekRecord = seek(key);
@@ -107,8 +108,10 @@ public class BinarySearchTree
 				
 				boolean result = childAddr.compareAndSet(leaf, newInternal, 0, 0);
 				
-				if (result)
+				if (result) {
+					System.out.println("Inserting " + key + " Successful");
 					return true;
+				}
 				else
 				{
 					int[] marks = new int[1];
@@ -119,8 +122,10 @@ public class BinarySearchTree
 						cleanup(key, seekRecord);
 				}
 			}
-			else
+			else {
+				System.out.println("Inserting " + key + " UnSuccessful");
 				return false;
+			}
 		}
 	}
 	
@@ -144,8 +149,10 @@ public class BinarySearchTree
 			{
 				leaf = seekRecord.leaf;
 				
-				if (leaf.key != key)
+				if (leaf.key != key) {
+					System.out.println("Deleting " + key + " UnSuccessful");
 					return false;
+				}
 				
 				//flag it
 				boolean result = childAddr.compareAndSet(leaf, leaf, 0, 2);
@@ -154,8 +161,10 @@ public class BinarySearchTree
 				{
 					mode = false; //mode = CLEANUP
 					boolean done = cleanup(key, seekRecord);
-					if (done)
+					if (done) {
+						System.out.println("Deleting " + key + " Successful");
 						return true;
+					}
 				}
 				else
 				{
@@ -169,13 +178,17 @@ public class BinarySearchTree
 			}
 			else //mode == CLEANUP
 			{
-				if (seekRecord.leaf != leaf)
+				if (seekRecord.leaf != leaf) {
+					System.out.println("Deleting " + key + " Successful");
 					return true;
+				}
 				else
 				{
 					boolean done = cleanup(key, seekRecord);
-					if (done)
+					if (done) {
+						System.out.println("Deleting " + key + " Successful");
 						return true;
+					}
 				}
 			}
 		}
