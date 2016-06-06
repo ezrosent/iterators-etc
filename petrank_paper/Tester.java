@@ -107,6 +107,7 @@ public class Tester {
 		System.out.println("Size = " + listIT.size(1));
 		iterate(listIT);
 		
+		
 		// Test 5: Do insertions and iterations together
 		System.out.println("**Test 5**");
 		

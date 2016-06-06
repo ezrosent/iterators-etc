@@ -82,6 +82,7 @@ public class ListIT {
 			{
 				SnapCollector<Node> sc = snapPointer.get();
 				if (sc.IsActive()) {
+					// report only if you are not going to be deleted
 					if (!curr.next.isMarked())
 						sc.Report(tid, curr, ReportType.add, curr.key);
 				}
@@ -94,6 +95,7 @@ public class ListIT {
 				if (pred.next.compareAndSet(curr, node, false, false)){
 					SnapCollector<Node> sc = snapPointer.get();
 					if (sc.IsActive()) {
+						// report only if you are not going to be deleted
 						if (!node.next.isMarked())
 							sc.Report(tid, node, ReportType.add, node.key);
 					}
@@ -117,6 +119,7 @@ public class ListIT {
 			else
 			{
 				Node succ = curr.next.getReference();
+				// just marking the next pointer 
 				snip = curr.next.compareAndSet(succ, succ, false, true);
 				if (!snip)
 					continue;
@@ -124,6 +127,7 @@ public class ListIT {
 				if (sc.IsActive()) {
 					sc.Report(tid, curr, ReportType.remove, curr.key);
 				}
+				// physically removing curr
 				if (!pred.next.compareAndSet(curr, succ, false, false))
 					 find(head,key,tid);
 				return true;

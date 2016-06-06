@@ -22,7 +22,7 @@ class Threads extends Thread {
 	public static BiFunction<Threads, List<Integer>, Object> testInsert = (Threads t, List<Integer> l) -> {
 		for(Integer element : l) {
 			//System.out.println("Inserting "+ element);
-			t.bst.insert(element);
+			t.bst.insert(t.tid, element);
 		}
 		return true; 
 	};
@@ -30,7 +30,7 @@ class Threads extends Thread {
 	// sort of a function pointer
 	public static BiFunction<Threads, List<Integer>, Object> testDelete = (Threads t, List<Integer> l) -> {   
 		for(Integer element : l) {
-			t.bst.delete(element);
+			t.bst.delete(t.tid, element);
 		}
 		return true; 
 	};
@@ -38,7 +38,7 @@ class Threads extends Thread {
 	// List l is dummy. Not used
 	public static BiFunction<Threads, List<Integer>, Object> testIterator = (Threads t, List<Integer> l) -> {
 		// TODO
-		/*List<Integer> iterationNodes = new<Integer> ArrayList();
+		List<Integer> iterationNodes = new<Integer> ArrayList();
 		iterationNodes = t.bst.iterate(t.tid);
 		
 		StringBuilder finalString = new StringBuilder();
@@ -47,7 +47,7 @@ class Threads extends Thread {
 		for(Integer element : iterationNodes) {
 			finalString.append(element + " ");
 		}
-		System.out.println(finalString);*/
+		System.out.println(finalString);
 		return true; 
 	};
 

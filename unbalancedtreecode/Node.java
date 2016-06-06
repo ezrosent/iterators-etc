@@ -5,8 +5,8 @@ public class Node
 {
 	public final int key;
 	
-	//the least significant bit of the stamp is tag 
-	//and the second to least significant bit is flag 
+	//the least significant bit of the stamp is tag -> sibling getting deleted
+	//and the second to least significant bit is flag -> I am getting deleted
 	public volatile AtomicStampedReference<Node> left; 
 	public volatile AtomicStampedReference<Node> right;
 	

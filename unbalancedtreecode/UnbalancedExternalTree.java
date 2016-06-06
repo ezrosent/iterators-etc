@@ -38,23 +38,25 @@ public class UnbalancedExternalTree {
 			}
 		}
 	}
-/*
+
 	public static void iterate(BinarySearchTree bst) {
 		// iterate over the list
-		List<Integer> iterationNodes = new<Integer> ArrayList();
-		iterationNodes = list.iterate(0);
+		List<Integer> iterationNodes = new ArrayList<Integer>();
+		iterationNodes = bst.iterate(0);
 		System.out.println("Iteration");
+		int count = 0;
 		for(Integer element : iterationNodes) {
 			Integer key = element;
-			System.out.print(key + " ");
+			//System.out.println("Item " + count + ": " + key);
+			count++;
 		}
-		System.out.println("");
+		System.out.println("Iteration Complete (found " + count + " items).");
 	}
-*/	
+	
 	public static void main(String[] args)
 	{
 		List<Integer> listInteger = new ArrayList<Integer>();
-		for(int i = 0; i < 10; i++) {
+		for(int i = 0; i < 100; i++) {
 			listInteger.add(i);
 		}
 		
@@ -66,7 +68,7 @@ public class UnbalancedExternalTree {
 		runUpdators();
 		waitForUpdators();
 		//System.out.println("Size = " + bst.size(0));
-		//iterate(bst);
+		iterate(bst);
 		
 		// Test2: Do some deletion : Every thread tries to delete the same value
 		System.out.println("\n**Test 2**");
@@ -76,7 +78,7 @@ public class UnbalancedExternalTree {
 		runUpdators();
 		waitForUpdators();
 		//System.out.println("Size = " + bst.size(0));
-		//iterate(bst);
+		iterate(bst);
 		
 		
 		//Test3: Insertion : All threads insert different values
@@ -91,7 +93,7 @@ public class UnbalancedExternalTree {
 		runUpdators();
 		waitForUpdators();
 		//System.out.println("Size = " + bst.size(1));
-		//iterate(bst);
+		iterate(bst);
 		
 		//Test4 Deletion: All threads delete different values
 		System.out.println("\n**Test 4**");
@@ -105,10 +107,11 @@ public class UnbalancedExternalTree {
 		runUpdators();
 		waitForUpdators();
 		//System.out.println("Size = " + bst.size(1));
-		//iterate(listIT);
+		iterate(bst);
+		
 		
 		// Test 5: Do insertions and iterations together
-		System.out.println("**Test 5**");
+		System.out.println("\n**Test 5**");
 		
 		// Create multiple threads: multiple trying to insert and others iterating
 		// insert threads
@@ -134,18 +137,7 @@ public class UnbalancedExternalTree {
 		for (m = 0; m < NUM_ITERATORS; m++) {
 			threadIterators[m].start();
 		}
-		/*
-		 // uncomment if some sort of interleaving between the 
-		 // starting of iterators and updators is desired
 		
-		// start insertion by rest of the threads
-		for (; k < NUM_UPDATORS; k++) {
-			threadUpdators[k].start();
-		}
-		for (; m < NUM_ITERATORS; m++) {
-			threadIterators[m].start();
-		}*/
-		//waitForUpdators();
-		//iterate(listIT);
+	
 	}
 }
