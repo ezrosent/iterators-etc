@@ -48,6 +48,7 @@ class LFListHashSet implements ISet
         return result > 0;
     }
 
+    // Ques: No resizing here? 
     public boolean remove(int key, int tid)
     {
         int result = apply(LFListNode.REMOVE, key);
@@ -61,6 +62,7 @@ class LFListHashSet implements ISet
         // if the b is empty, use old table
         if (b == null) {
             HNode s = t.old;
+            // this is that weird interleaving mentioned in the paper
             b = (s == null)
                 ? t.buckets.get(key % t.size)
                 : s.buckets.get(key % s.size);
@@ -124,7 +126,9 @@ class LFListHashSet implements ISet
             if (b == null)
                 helpResize(t, i);
             // otherwise enlist at b
+            // Ques: invoke is doing what?
             else if (b.invoke(h))
+            	// gettResponse is actually doing operations before returning the result
                 return LFListFSet.getResponse(h, type);
 
         }
@@ -163,6 +167,7 @@ class LFListHashSet implements ISet
             if (s.size * 2 == t.size) /* growing */ {
                 LFListFSet p = s.buckets.get(i % s.size);
                 p.freeze();
+                // Ques: see how split manages two sets
                 set = p.split(t.size, i);
             }
             else /* shrinking */ {

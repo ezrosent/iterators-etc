@@ -1,6 +1,6 @@
 import java.util.Random;
 import java.text.*;
-import gnu.getopt.Getopt;
+//import gnu.getopt.Getopt;
 
 class SetBench
 {
@@ -29,7 +29,9 @@ class SetBench
 
     private static boolean ParseArgs(String [] args)
     {
-        Getopt g = new Getopt("", args, "a:p:d:R:M:I:hc");
+      return true;
+    	/*
+    	Getopt g = new Getopt("", args, "a:p:d:R:M:I:hc");
         int c;
         String arg = null;
         while ((c = g.getopt()) != -1)
@@ -70,6 +72,7 @@ class SetBench
             }
         }
         return true;
+        */
     }
 
     private static void RunBench(boolean warmup)
@@ -273,12 +276,12 @@ class SetBench
     }
 
 
-    public static void main(String[] args)
+    public static void main1(String[] args)
         throws InterruptedException
     {
-        if (!ParseArgs(args))
+        /*if (!ParseArgs(args))
             return;
-
+*/
         if (SANITY_MODE) {
             SanityCheck(1, THREAD_NUM);
             SanityCheck(THREAD_NUM, 1);

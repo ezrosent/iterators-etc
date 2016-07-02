@@ -7,16 +7,29 @@ class LFArrayFSet
     private static AtomicReferenceFieldUpdater<LFArrayFSet, Object> headUpdater
         = AtomicReferenceFieldUpdater.newUpdater(LFArrayFSet.class, Object.class, "head");
 
-    private volatile Object head;
+    public volatile Object head;
 
     static class FreezeMarker
     {
-        public int [] arr;
+        public Node [] arr;
 
-        public FreezeMarker(int [] a)
+        public FreezeMarker(Node [] a)
         {
             arr = a;
         }
+    }
+    
+    // This class is just used to return multiple values from arrayInsert and arrayRemove
+    static class Wrapper 
+    {
+    	public Node[] arr; // new FSet created by arrayInsert and arrayRemove
+    	public Node node; // node that is being inserted or deleted
+    	
+    	public Wrapper() {
+    		arr = null;
+    		node = null;
+    	}
+    	
     }
 
     private boolean casHead(Object o, Object n)
@@ -27,25 +40,35 @@ class LFArrayFSet
     // default constructor
     public LFArrayFSet()
     {
-        head = new int[0];
+        head = new Node[0];
     }
 
     // copy constructor
-    public LFArrayFSet(int [] arr)
+    public LFArrayFSet(Node [] arr)
     {
         head = arr;
     }
 
-    public int invoke(boolean insert, int key)
+    // TODO: pass snapcollector here as a parameter
+    public int invoke(int tid, boolean insert, int key, SnapCollector<Node> sc)
     {
         Object h = head;
-        while (h instanceof int []) {
-            int [] o = (int [])h;
-            int [] n = insert ? arrayInsert(o, key) : arrayRemove(o, key);
-            if (n == o)
+        Wrapper ret;
+        while (h instanceof Node []) {
+        	Node [] o = (Node [])h;
+        	ret = insert ? arrayInsert(o, key) : arrayRemove(o, key);
+        	Node [] n = ret.arr;
+            if (n == o) 
                 return -(n.length + 1);
-            else if (casHead(h, n))
+            else if (casHead(h, n)) {
+            	// TODO: if CAS successful "report" the "node"
+            	if (insert) {
+            	    sc.Report(tid, ret.node, ReportType.add, ret.node.key);
+            	} else {
+            		sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+            	}
                 return n.length + 1;
+            }
             h = head;
         }
         return 0;
@@ -54,8 +77,8 @@ class LFArrayFSet
     public boolean hasMember(int key)
     {
         Object h = head;
-        int [] arr = (h instanceof int [])
-            ? (int [])h
+        Node [] arr = (h instanceof Node [])
+            ? (Node [])h
             : ((FreezeMarker)h).arr;
         return arrayContains(arr, key);
     }
@@ -66,7 +89,7 @@ class LFArrayFSet
             Object h = head;
             if (h instanceof FreezeMarker)
                 return;
-            FreezeMarker m = new FreezeMarker((int [])h);
+            FreezeMarker m = new FreezeMarker((Node [])h);
             if (casHead(h, m))
                 return;
         }
@@ -74,29 +97,83 @@ class LFArrayFSet
 
     public LFArrayFSet split(int size, int remainder)
     {
-        int [] o = ((FreezeMarker)head).arr;
+    	Node [] o = ((FreezeMarker)head).arr;
 
         int count = 0;
         for (int i = 0; i < o.length; i++)
-            if (o[i] % size == remainder)
+            if (o[i].key % size == remainder)
                 count++;
 
-        int [] n = new int[count];
+        Node [] n = new Node[count];
         int j = 0;
         for (int i = 0; i < o.length; i++) {
-            if (o[i] % size == remainder)
+            if (o[i].key % size == remainder)
+                n[j++] = o[i];
+        }
+
+        return new LFArrayFSet(n);
+    }
+    
+    public LFArrayFSet merge(LFArrayFSet t2)
+    {
+    	Node [] p = ((FreezeMarker)head).arr;
+    	Node [] q = ((FreezeMarker)t2.head).arr;
+
+    	Node [] n = new Node[p.length + q.length];
+        int j = 0;
+        for (int i = 0; i < p.length; i++)
+            n[j++] = p[i];
+        for (int i = 0; i < q.length; i++)
+            n[j++] = q[i];
+
+        return new LFArrayFSet(n);
+    }
+    
+    
+    public LFArrayFSet splitForIterate(int size, int remainder)
+    {
+    	Object h = head;
+    	Node[] o;
+    	if (h instanceof FreezeMarker) {
+    	    o = ((FreezeMarker)h).arr;
+    	} else {
+    		o = (Node [])h;
+    	}
+
+        int count = 0;
+        for (int i = 0; i < o.length; i++)
+            if (o[i].key % size == remainder)
+                count++;
+
+        Node [] n = new Node[count];
+        int j = 0;
+        for (int i = 0; i < o.length; i++) {
+            if (o[i].key % size == remainder)
                 n[j++] = o[i];
         }
 
         return new LFArrayFSet(n);
     }
 
-    public LFArrayFSet merge(LFArrayFSet t2)
+    public LFArrayFSet mergeForIterate(LFArrayFSet t2)
     {
-        int [] p = ((FreezeMarker)head).arr;
-        int [] q = ((FreezeMarker)t2.head).arr;
+    	Object h = head;
+    	Node[] p;
+    	if (h instanceof FreezeMarker) {
+    	    p = ((FreezeMarker)h).arr;
+    	} else {
+    		p = (Node [])h;
+    	}
+   
+    	h = t2.head;
+    	Node [] q;
+    	if (h instanceof FreezeMarker) {
+    	    q = ((FreezeMarker)h).arr;
+    	} else {
+    		q = (Node [])h;
+    	}
 
-        int [] n = new int[p.length + q.length];
+    	Node [] n = new Node[p.length + q.length];
         int j = 0;
         for (int i = 0; i < p.length; i++)
             n[j++] = p[i];
@@ -109,51 +186,72 @@ class LFArrayFSet
     public void print()
     {
         Object h = head;
-        int [] arr = null;
+        Node [] arr = null;
 
         if (h instanceof FreezeMarker) {
             System.out.print("(F) ");
             arr = ((FreezeMarker)h).arr;
         }
         else {
-            arr = (int [])h;
+            arr = (Node [])h;
         }
 
-        for (int i : arr)
-            System.out.print(Integer.toString(i) + " ");
+        for (Node i : arr)
+            System.out.print(Integer.toString(i.key) + " ");
         System.out.println();
     }
 
-    private static boolean arrayContains(int [] o, int key)
+    private static boolean arrayContains(Node [] o, int key)
     {
         for (int i = 0; i < o.length; i++) {
-            if (o[i] == key)
+            if (o[i].key == key)
                 return true;
         }
         return false;
     }
 
-    private static int [] arrayInsert(int [] o, int key)
+    // TODO: take one more parameter, say LFArrayFSetNode node
+    // this parameter returns the node which is inserted
+    private static Wrapper arrayInsert(Node [] o, int key)
     {
-        if (arrayContains(o, key))
-            return o;
-        int [] n = new int[o.length + 1];
+    	Wrapper ret = new Wrapper();
+        if (arrayContains(o, key)) {
+        	ret.arr = o;
+        	ret.node = null;
+            return ret;
+        }
+        Node [] n = new Node[o.length + 1];
         for (int i = 0; i < o.length; i++)
             n[i] = o[i];
-        n[n.length - 1] = key;
-        return n;
+        
+        n[n.length - 1] = new Node();
+        n[n.length - 1].key = key;
+        
+        ret.arr = n;
+        ret.node = n[n.length - 1];
+        return ret;
     }
 
-    private static int [] arrayRemove(int [] o, int key)
+    // TODO: take one more parameter, say LFArrayFSetNode node
+    // this parameter returns the node which is being deleted
+    private static Wrapper arrayRemove(Node [] o, int key)
     {
-        if (!arrayContains(o, key))
-            return o;
-        int [] n = new int[o.length - 1];
+    	Wrapper ret = new Wrapper();
+        if (!arrayContains(o, key)) {
+        	ret.arr = o;
+        	ret.node = null;
+            return ret;
+        }
+        Node [] n = new Node[o.length - 1];
         int j = 0;
         for (int i = 0; i < o.length; i++) {
-            if (o[i] != key)
+            if (o[i].key != key) {
                 n[j++] = o[i];
+            } else {
+            	ret.arr = n;
+            	ret.node = o[i];
+            }
         }
-        return n;
+        return ret;
     }
 }

@@ -25,7 +25,10 @@ class LFListFSet
     {
         head = h;
     }
-
+ 
+    // Ques: why just insertion? No deletion?
+    // Ques: Also did not check for duplicates? 
+    // What if the element to be inserted is already present in FSET
     public boolean invoke(LFListNode h)
     {
         LFListNode b = head;
@@ -135,6 +138,7 @@ class LFListFSet
             else if (curr.key == -1) {
                 System.out.print("$");
             }
+            // Ques: what are the different states
             else if (curr.state != LFListNode.DEAD) {
                 System.out.print(curr.key);
                 if (curr.state != LFListNode.DATA) {
@@ -229,4 +233,7 @@ class LFListFSet
         }
         return -x;  // false
     }
+    
+    // TODO: write here an iteration function
+    // is print our iterator
 }
