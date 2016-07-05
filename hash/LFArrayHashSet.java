@@ -207,7 +207,8 @@ class LFArrayHashSet implements ISet
 		 */
 		HNode t = head;
 		HNode s = t.old;
-		for (int i = 0; i < t.size; i++) {
+		
+		for (int i = 0; i < t.size && sc.IsActive(); i++) {
 			// get the i-th bucket
 			LFArrayFSet b = t.buckets.get(i);
 			if ((b == null) && (s != null)) {

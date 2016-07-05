@@ -100,8 +100,8 @@ public class Test {
 		System.out.println("\n**Test 4**");
 		for (int i = 0; i < NUM_UPDATORS; i++) {
 			listInteger.clear();
-			for(int j = 1; j <= 5; j++) {
-				listInteger.add(5 * i + j);
+			for(int j = 1; j <= 10; j++) {
+				listInteger.add(10 * i + j);
 			}
 			threadUpdators[i] = createThreadsForDelete(i, new ArrayList<Integer>(listInteger));
 		}
@@ -127,11 +127,7 @@ public class Test {
 		for (int i = 0; i < NUM_ITERATORS; i++) {
 			threadIterators[i] = createThreadsForIterator(i + NUM_UPDATORS);
 		}
-		// start iteration by all the iterators
-		int m = 0;
-		for (m = 0; m < NUM_ITERATORS; m++) {
-			threadIterators[m].start();
-		}
+
 
 		// start insertion by the updators
 		int k = 0;
@@ -140,5 +136,10 @@ public class Test {
 		}
 
 
+		// start iteration by all the iterators
+		int m = 0;
+		for (m = 0; m < NUM_ITERATORS; m++) {
+			threadIterators[m].start();
+		}
 	}
 }
