@@ -51,6 +51,8 @@ FILENAMES += BenchOpsThread CheckingThread ResizingThread
 FILENAMES += ISet LFListNode WFListNode
 FILENAMES += SetBench
 
+FILENAMES += ReportItem SnapCollector 
+
 SOURCES   = $(patsubst %, %.java, $(FILENAMES))
 OFILES    = $(patsubst %, %.class, $(FILENAMES))
 GOAL      = $(OFILES)

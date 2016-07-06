@@ -223,6 +223,7 @@ class LFArrayHashSet implements ISet
 				}
 			}
 			// iterate b
+                        //System.out.println("Bucket size: " + ((Node [])(b.head)).length);
 			for (int j = 0; j < ((Node [])(b.head)).length; j++) {
 				sc.AddNode(((Node [])(b.head))[j], ((Node [])(b.head))[j].key);
 				//System.out.println("Succesfully added "+ ((Node [])(b.head))[j].key);

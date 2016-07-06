@@ -14,6 +14,9 @@ class LFArrayHashSetOpt implements ISet
         // store the size [for convenience]
         public final int size;
 
+	// the snap collector
+	// private 
+
         // constructor
         public HNode(HNode o, int s)
         {
