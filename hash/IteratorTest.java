@@ -3,9 +3,9 @@ import java.text.DecimalFormat;
 import gnu.getopt.Getopt;
 
 class IteratorTest {
-    public static int ITERATORS_NUM = 2;
-    public static int UPDATERS_NUM = 4;
-    public static int DURATION = 2;
+    public static int ITERATORS_NUM = 8;
+    public static int UPDATERS_NUM = 24;
+    public static int DURATION = 5;
     public static int INSERT_PERCENT = 25;
     public static int REMOVE_PERCENT = 25;
     public static int KEY_RANGE = 4096;

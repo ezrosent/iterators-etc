@@ -222,6 +222,10 @@ class LFArrayHashSet implements ISet
 					b = p.mergeForIterate(q);
 				}
 			}
+			else {
+				// Make a copy of the bucket for iteration
+				b = new LFArrayFSet((Node [])(t.buckets.get(i).head));
+			}
 			// iterate b
                         //System.out.println("Bucket size: " + ((Node [])(b.head)).length);
 			for (int j = 0; j < ((Node [])(b.head)).length; j++) {
