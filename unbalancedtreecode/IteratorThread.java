@@ -10,7 +10,7 @@ class IteratorThread extends Thread {
     }
 
     public void run() {
-        ISet set = IteratorTest.set;
+        BinarySearchTree set = IteratorTest.set;
 
         while (!IteratorTest.begin);
 

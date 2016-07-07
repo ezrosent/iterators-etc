@@ -14,7 +14,7 @@ class IteratorTest {
     public static int KEY_RANGE = 4096;
     public static int INIT_SIZE = 1024;
     
-    public static volatile ISet set = null;
+    public static volatile BinarySearchTree set = null;
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
     
@@ -76,13 +76,13 @@ class IteratorTest {
     }
 
     private static void InitializeSet() {
-        IteratorTest.set = new LFArrayHashSet();
+        IteratorTest.set = new BinarySearchTree();
 
         Random rng = new Random();
         for (int i = 0; i < INIT_SIZE; i++) {
             while (true) {
                 int key = rng.nextInt(KEY_RANGE);
-                if (set.insert(key, 0))
+                if (set.insert(0, key))
                     break;
             }
         }
