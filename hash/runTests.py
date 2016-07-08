@@ -6,7 +6,7 @@ UPDATERS_NUM = [1, 2, 4, 8]
 DURATION = [2]
 PERCENTAGES = [(25, 25)]
 KEY_RANGE = [65536]
-INIT_SIZE = [1024, 8192]
+INIT_SIZE = [1024]
 
 PARAMETER_COMBINATIONS = [ITERATORS_NUM, UPDATERS_NUM, DURATION, PERCENTAGES, KEY_RANGE, INIT_SIZE]
 
@@ -19,7 +19,6 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 	args += ["-R", str(param[3][1])]
 	args += ["-M", str(param[4])]
 	args += ["-s", str(param[5])]
-	print args
 	pTest = Popen(args, stdout=PIPE)
 	result = pTest.communicate()[0]
 	print result
