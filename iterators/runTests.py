@@ -4,7 +4,7 @@ import itertools
 ITERATORS_NUM = [1, 2] # Compare against 0
 UPDATERS_NUM = [1, 2, 3, 4, 5, 6, 7]
 DURATION = [2, 4]
-PERCENTAGES = [(25, 25), (20, 10), (50, 50)]
+PERCENTAGES = [(25, 25, 50), (20, 10, 70), (50, 50, 0)]
 KEY_RANGE = [4096]
 INIT_SIZE = [1024]
 
