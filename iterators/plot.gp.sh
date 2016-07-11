@@ -9,15 +9,25 @@ nIterators = "`head -1 config.txt`"
 nUpdators = "`head -2 config.txt | tail -1`"
 nDuration = "`head -3 config.txt | tail -1`"
 nWeightConfig = "`head -4 config.txt | tail -1`"
+
+#print nIterators
+#print nUpdators
+#print nDuration
+#print nWeightConfig
+
 firstLine = 1
 lastLine = firstLine + (words(nUpdators) * words(nDuration) * words(nWeightConfig)) - 1
 increment = words(nDuration) * words(nWeightConfig)
 
 # the starting column of time parameter. Before this column are the benchmark parameters.
 startCol = "`wc -l < config.txt`" + 1
+#print startCol
 nPlotsY = words(nDuration)
+#print nPlotsY
 nPlotsX = words(nWeightConfig)
+#print nPlotsX
 nMultiplots = words(nIterators)
+#print nMultiplots
 
 do for [l=1:nMultiplots] {
 
@@ -48,7 +58,7 @@ do for [l=1:nMultiplots] {
     set xtics nUpdators
 
     # fix the values on y-axis
-    set yrange[0.1:0.9]
+    set yrange[0.0:1.5]
 
     set xlabel "Number of updators" font ", 16" #font "Times New Roman, 8"
     set ylabel "Slowdown" font ", 16" #font "Times New Roman, 8"
@@ -64,7 +74,7 @@ do for [l=1:nMultiplots] {
 	    set title "config = " . word(nWeightConfig,j) . ", duration = " . word(nDuration,k) . "sec" font ", 14"
 	    set origin originX,originY
             originX = originX + deltaX;
-	    plot for [i=1:nLines] "Output.txt" using 2:columns(i) every increment::firstLine::lastLine title word(titles,i) with linespoints linewidth 2 pointsize 1
+	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every increment::firstLine::lastLine title word(titles,i) with linespoints linewidth 2 pointsize 1
 	    firstLine = firstLine + 1
        }
     }

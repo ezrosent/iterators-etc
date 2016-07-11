@@ -16,7 +16,12 @@ configfile = open("config.txt", 'w')
 configfile.write(' '.join(map(str, ITERATORS_NUM)) + '\n')
 configfile.write(' '.join(map(str, UPDATERS_NUM)) + '\n')
 configfile.write(' '.join(map(str, DURATION)) + '\n')
-configfile.write(' '.join(map(str, PERCENTAGES)) + '\n')
+#configfile.write(' '.join(map(str, PERCENTAGES)) + '\n')
+perc_string = ""
+for perc in PERCENTAGES:
+	perc_string += "(%d,%d,%d) " % (perc[0], perc[1], perc[2])
+perc_string = perc_string.strip() + '\n'
+configfile.write(perc_string)
 configfile.write(' '.join(map(str, KEY_RANGE)) + '\n')
 configfile.write(' '.join(map(str, INIT_SIZE)) + '\n')
 configfile.close()
@@ -45,6 +50,14 @@ def makeargs(param, alg, i):
 count = 0
 total = runs * len([j for j in itertools.product(*PARAMETER_COMBINATIONS)])
 
+def to_str(data):
+	if type(data) != type(()):
+		return str(data)
+	else:
+		return_str = "("
+		return_str += (','.join(map(str, data))).strip(',') + ')'
+		return return_str
+
 # main loop
 for param in itertools.product(*PARAMETER_COMBINATIONS):
 	accum_hash = 0
@@ -64,7 +77,7 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 		result1b = int(pTest1b.communicate()[0].strip())
 
 		# calculate/write verbose output
-		line = reduce(lambda x, y: x + y, map(lambda x: str(x) + '\t', param + (r+1,)))
+		line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param + (r+1,)))
 		line += str(float(result1h)/result0h) + '\t'
 		line += str(float(result1b)/result0b) + '\n'
 		verbose.write(line)
@@ -77,7 +90,7 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 		print "%d of %d done" % (count, total)
 
 	# write averages
-	line = reduce(lambda x, y: x + y, map(lambda x: str(x) + '\t', param))
+	line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param))
 	line += str(accum_hash/runs) + '\t'
 	line += str(accum_ubst/runs) + '\n'
 	outputfile.write(line)
