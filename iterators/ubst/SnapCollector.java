@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SnapCollector<T> {
 
 	// tids are expected to be 0...NUM_THREADS-1
-	static int NUM_THREADS = 32;
+	static int NUM_THREADS = 64;
 	
 	class NodeWrapper<V> {
 		V node;

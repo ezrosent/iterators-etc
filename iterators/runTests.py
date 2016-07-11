@@ -2,7 +2,7 @@ from subprocess import Popen, PIPE
 import itertools
 
 ITERATORS_NUM = [1, 2] # Compare against 0
-UPDATERS_NUM = [1, 2, 3, 4, 5, 6, 7]
+UPDATERS_NUM = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
 DURATION = [2, 4]
 PERCENTAGES = [(25, 25, 50), (20, 10, 70), (50, 50, 0)]
 KEY_RANGE = [4096]

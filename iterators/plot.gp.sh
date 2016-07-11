@@ -55,7 +55,7 @@ do for [l=1:nMultiplots] {
     unset key
 
     # fix the values on x-axis
-    set xtics nUpdators
+    #set xtics nUpdators
 
     # fix the values on y-axis
     set yrange[0.0:1.5]
