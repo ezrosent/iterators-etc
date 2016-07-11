@@ -7,7 +7,7 @@ DURATION = [2, 4]
 PERCENTAGES = [(25, 25, 50), (20, 10, 70), (50, 50, 0)]
 KEY_RANGE = [4096]
 INIT_SIZE = [1024]
-runs = 10
+runs = 1
 
 # Maybe sanitize inputs here
 
