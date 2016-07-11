@@ -16,5 +16,8 @@ hs_err_pid*
 # eclipse file
 *.classpath
 *.project
+
+#Output files
+Output/
 *.txt
 *.png

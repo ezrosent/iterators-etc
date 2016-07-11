@@ -45,7 +45,7 @@ do for [l=1:nMultiplots] {
     sizeY = deltaY
 
     #set the name of the output file
-    set output "iterators_" . word(nIterators, l) . ".png" 
+    set output outputDir."/iterators_" . word(nIterators, l) . ".png" 
     set term png size 1200,1200
 
     # size x, y tells the percentage of width and height of the plot window.
