@@ -88,7 +88,9 @@ class IteratorTest {
         }
     }
 
-    private static void RunTest() throws InterruptedException {
+    private static void RunTest(boolean warmup) throws InterruptedException {
+        InitializeSet();
+
         begin = false;
         stop = false;
 
@@ -112,7 +114,10 @@ class IteratorTest {
         begin = true;
 
         // wait for duration
-        Thread.sleep(DURATION * 1000);
+        if (warmup)
+            Thread.sleep(500);
+        else
+            Thread.sleep(DURATION * 1000);
 
         // call time
         stop = true;
@@ -153,19 +158,18 @@ class IteratorTest {
         System.out.println(new DecimalFormat("#.##").format((double)(inserts + removals + contains) / elapsed));
         */
         long totalOps = inserts + removals + contains;
-        System.out.println(totalOps);
+        if (!warmup)
+            System.out.println(totalOps);
 
         System.gc();
     }
 
     public static void main(String[] args) throws InterruptedException {
         // Get command line argument
-        ParseArgs(args);
-
-        // Initialize the hash table
-        InitializeSet();
+        if (!ParseArgs(args)) return;
 
         // Run test
-        RunTest();
+        RunTest(true);
+        RunTest(false);
     }
 }
