@@ -1,19 +1,21 @@
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 class UpdaterThread extends Thread {
     private int id;
     private Random oprng;
     private Random keyrng;
 
-    public AtomicInteger inserts = new AtomicInteger();
-    public AtomicInteger removals = new AtomicInteger();
-    public AtomicInteger contains = new AtomicInteger();
+    public int inserts;
+    public int removals;
+    public int contains;
 
     public UpdaterThread(int i) {
         this.id = i;
         this.oprng = new Random(i);
         this.keyrng = new Random(i);
+        inserts = 0;
+        removals = 0;
+        contains = 0;
     }
 
     public void run() {
@@ -29,15 +31,15 @@ class UpdaterThread extends Thread {
 
             if (op < insertThresh) {
                 set.insert(id, key);
-                inserts.getAndIncrement();
+                inserts += 1;
             }
             else if (op < removeThresh) {
                 set.delete(id, key);
-                removals.getAndIncrement();
+                removals += 1;
             }
             else {
                 set.search(id, key);
-                contains.getAndIncrement();
+                contains += 1;
             }
         }
     }

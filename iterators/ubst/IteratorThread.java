@@ -1,12 +1,10 @@
-import java.util.concurrent.atomic.AtomicInteger;
-
 class IteratorThread extends Thread {
     private int id;
-    public AtomicInteger iterations;
+    public int iterations;
 
     public IteratorThread(int i) {
         this.id = i;
-        iterations = new AtomicInteger();
+        iterations = 0;
     }
 
     public void run() {
@@ -16,7 +14,7 @@ class IteratorThread extends Thread {
 
         while (!IteratorTest.stop) {
             set.iterate(id);
-            iterations.getAndIncrement();
+            iterations += 1;
         }
     }
 }
