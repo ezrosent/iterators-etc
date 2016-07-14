@@ -133,14 +133,14 @@ class IteratorTest {
         long removals = 0;
         long contains = 0;
         for (int i = 0; i < updaterThreads.length; i++) {
-            inserts += updaterThreads[i].inserts.get();
-            removals += updaterThreads[i].removals.get();
-            contains += updaterThreads[i].contains.get();
+            inserts += updaterThreads[i].inserts;
+            removals += updaterThreads[i].removals;
+            contains += updaterThreads[i].contains;
         }
 
         int iterations = 0;
         for (int i = 0; i < iteratorThreads.length; i++)
-            iterations += iteratorThreads[i].iterations.get();
+            iterations += iteratorThreads[i].iterations;
 
         /*
         System.out.print("Time elapsed (ms): ");
