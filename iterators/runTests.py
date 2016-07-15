@@ -62,6 +62,7 @@ def to_str(data):
 for param in itertools.product(*PARAMETER_COMBINATIONS):
 	accum_hash = 0
 	accum_ubst = 0
+	# accum_list
 	for r in xrange(runs):
 		# Compare each run against identical run with no iterators
 		# hash table
@@ -75,16 +76,20 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 		result0b = int(pTest0b.communicate()[0].strip())
 		pTest1b = Popen(makeargs(param, "ubst", param[0]), stdout=PIPE)
 		result1b = int(pTest1b.communicate()[0].strip())
+		
+		#Add linked list code here
 
 		# calculate/write verbose output
 		line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param + (r+1,)))
 		line += str(float(result1h)/result0h) + '\t'
-		line += str(float(result1b)/result0b) + '\n'
+		line += str(float(result1b)/result0b) + '\n' # change this to a tab
+		# add line here
 		verbose.write(line)
 
 		# accumulate to calculate an average over runs
 		accum_hash += float(result1h) / result0h
 		accum_ubst += float(result1b) / result0b
+		# accum_list
 
 		count += 1
 		print "%d of %d done" % (count, total)
@@ -92,7 +97,8 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 	# write averages
 	line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param))
 	line += str(accum_hash/runs) + '\t'
-	line += str(accum_ubst/runs) + '\n'
+	line += str(accum_ubst/runs) + '\n' # changethis to a tab
+	# add line here
 	outputfile.write(line)
 
 outputfile.close()
