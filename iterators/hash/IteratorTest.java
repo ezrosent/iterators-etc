@@ -85,6 +85,7 @@ class IteratorTest {
                 if (set.insert(key, 0))
                     break;
             }
+	    //if (i % 10000 == 0) System.out.println(i + " elements initialized");
         }
     }
 

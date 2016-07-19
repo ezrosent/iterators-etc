@@ -3,6 +3,8 @@ cd hash
 javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
 cd ../ubst
 javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
+cd ../linked_list
+javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
 cd ..
 
 # create a folder with the current time in the Output directory

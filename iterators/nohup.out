@@ -838,3 +838,96 @@
 838 of 840 done
 839 of 840 done
 840 of 840 done
+Killed
+line 114: warning: Skipping data file with no valid points
+line 114: warning: Skipping data file with no valid points
+
+;
+	    set title "config = " . word(nWeightConfig,j) . ", duration = " . word(nDuration,k) . "sec" font ", 14";
+	    set origin originX,originY;
+            originX = originX + deltaX;;
+	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every increment::firstLine::lastLine title word(titles,i) with linespoints linewidth 2 pointsize 1;
+	    firstLine = firstLine + 1;
+       
+  	                                                                                                             	                                                                         	                                                                                                                                                            ^
+line 114: x range is invalid
+
+1 of 12 done
+Traceback (most recent call last):
+  File "runTests.py", line 70, in <module>
+    result0h = int(pTest0h.communicate()[0].strip())
+  File "/usr/lib/python2.7/subprocess.py", line 791, in communicate
+    stdout = _eintr_retry_call(self.stdout.read)
+  File "/usr/lib/python2.7/subprocess.py", line 476, in _eintr_retry_call
+    return func(*args)
+KeyboardInterrupt
+  File "runTests.py", line 5
+    UPDATERS_NUM = [1 2 3 4 5 6 7] #[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
+                      ^
+SyntaxError: invalid syntax
+Warning: empty x range [2:2], adjusting to [1.98:2.02]
+line 114: warning: Skipping data file with no valid points
+line 114: warning: Skipping data file with no valid points
+line 114: warning: Skipping data file with no valid points
+
+;
+	    set title "config = " . word(nWeightConfig,j) . ", duration = " . word(nDuration,k) . "sec" font ", 14";
+	    set origin originX,originY;
+            originX = originX + deltaX;;
+	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every increment::firstLine::lastLine title word(titles,i) with linespoints linewidth 2 pointsize 1;
+	    firstLine = firstLine + 1;
+       
+  	                                                                                                             	                                                                         	                                                                                                                                                            ^
+line 114: x range is invalid
+
+  File "runTests.py", line 5
+    UPDATERS_NUM = [1 2 3 4 5 6 7] #[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
+                      ^
+SyntaxError: invalid syntax
+head: cannot open 'config.txt' for reading: No such file or directory
+head: cannot open 'config.txt' for reading: No such file or directory
+head: cannot open 'config.txt' for reading: No such file or directory
+head: cannot open 'config.txt' for reading: No such file or directory
+sh: 1: cannot open config.txt: No such file
+mv: cannot stat 'config.txt': No such file or directory
+mv: cannot stat 'output.txt': No such file or directory
+mv: cannot stat 'output_verbose.txt': No such file or directory
+Traceback (most recent call last):
+  File "runTests.py", line 82, in <module>
+    result0l = int(pTest0l.communicate()[0].strip())
+ValueError: invalid literal for int() with base 10: ''
+line 114: warning: Skipping data file with no valid points
+line 114: warning: Skipping data file with no valid points
+line 114: warning: Skipping data file with no valid points
+
+;
+	    set title "config = " . word(nWeightConfig,j) . ", duration = " . word(nDuration,k) . "sec" font ", 14";
+	    set origin originX,originY;
+            originX = originX + deltaX;;
+	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every increment::firstLine::lastLine title word(titles,i) with linespoints linewidth 2 pointsize 1;
+	    firstLine = firstLine + 1;
+       
+  	                                                                                                             	                                                                         	                                                                                                                                                            ^
+line 114: x range is invalid
+
+1 of 21 done
+2 of 21 done
+3 of 21 done
+4 of 21 done
+5 of 21 done
+6 of 21 done
+7 of 21 done
+8 of 21 done
+9 of 21 done
+10 of 21 done
+11 of 21 done
+12 of 21 done
+13 of 21 done
+14 of 21 done
+15 of 21 done
+16 of 21 done
+17 of 21 done
+18 of 21 done
+19 of 21 done
+20 of 21 done
+21 of 21 done

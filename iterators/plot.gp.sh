@@ -4,7 +4,7 @@ reset
 # set term dumb
 
 # number of lines in one plot : ie, number of data structures
-nLines = 2
+nLines = 2 # should be 3 when including LL
 nIterators = "`head -1 config.txt`"
 nUpdators = "`head -2 config.txt | tail -1`"
 nDuration = "`head -3 config.txt | tail -1`"

@@ -14,7 +14,7 @@ class IteratorTest {
     public static int KEY_RANGE = 4096;
     public static int INIT_SIZE = 1024;
     
-    public static volatile BinarySearchTree set = null;
+    public static volatile ListIT set = null;
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
     
@@ -76,7 +76,7 @@ class IteratorTest {
     }
 
     private static void InitializeSet() {
-        IteratorTest.set = new BinarySearchTree();
+        IteratorTest.set = new ListIT();
 
         Random rng = new Random();
         for (int i = 0; i < INIT_SIZE; i++) {
@@ -85,7 +85,7 @@ class IteratorTest {
                 if (set.insert(0, key))
                     break;
             }
-	    //if (i % 10000 == 0) System.out.println(i + " elements initialised");
+	    if (i % 10000 == 0) System.out.println(i + " elements initialised");
         }
     }
 

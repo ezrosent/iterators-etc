@@ -1,12 +1,12 @@
 from subprocess import Popen, PIPE
 import itertools
 
-ITERATORS_NUM = [1, 2] # Compare against 0
-UPDATERS_NUM = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
-DURATION = [2, 4]
-PERCENTAGES = [(25, 25, 50), (20, 10, 70), (50, 50, 0)]
-KEY_RANGE = [4096]
-INIT_SIZE = [1024]
+ITERATORS_NUM = [1] # Compare against 0
+UPDATERS_NUM = [1, 2, 3, 4, 5, 6, 7] #[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
+DURATION = [4]
+PERCENTAGES = [(25, 25, 50) , (20, 10, 70), (50, 50, 0)]
+KEY_RANGE = [10000000]
+INIT_SIZE = [500000]
 runs = 1
 
 # Maybe sanitize inputs here
@@ -28,9 +28,9 @@ configfile.close()
 
 # Open file, write header
 outputfile = open("output.txt", 'w')
-outputfile.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT\tHASH\tUBST\n")
+outputfile.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT\tHASH\tUBST\tLL\n")
 verbose = open("output_verbose.txt", 'w')
-verbose.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT\tRUN\tHASH\tUBST\n")
+verbose.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT\tRUN\tHASH\tUBST\tLL\n")
 
 PARAMETER_COMBINATIONS = [ITERATORS_NUM, UPDATERS_NUM, DURATION, PERCENTAGES, KEY_RANGE, INIT_SIZE]
 
@@ -62,7 +62,7 @@ def to_str(data):
 for param in itertools.product(*PARAMETER_COMBINATIONS):
 	accum_hash = 0
 	accum_ubst = 0
-	# accum_list
+	#accum_list = 0
 	for r in xrange(runs):
 		# Compare each run against identical run with no iterators
 		# hash table
@@ -77,19 +77,23 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 		pTest1b = Popen(makeargs(param, "ubst", param[0]), stdout=PIPE)
 		result1b = int(pTest1b.communicate()[0].strip())
 		
-		#Add linked list code here
+		#linked list 
+		#pTest0l = Popen(makeargs(param, "linked_list", 0), stdout=PIPE)
+		#result0l = int(pTest0l.communicate()[0].strip())
+		#pTest1l = Popen(makeargs(param, "linked_list", param[0]), stdout=PIPE)
+		#result1l = int(pTest1l.communicate()[0].strip())
 
 		# calculate/write verbose output
 		line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param + (r+1,)))
 		line += str(float(result1h)/result0h) + '\t'
-		line += str(float(result1b)/result0b) + '\n' # change this to a tab
-		# add line here
+		line += str(float(result1b)/result0b) + '\n'
+		#line += str(float(result1l)/result0l) + '\n' 
 		verbose.write(line)
 
 		# accumulate to calculate an average over runs
 		accum_hash += float(result1h) / result0h
 		accum_ubst += float(result1b) / result0b
-		# accum_list
+		#accum_list += float(result1l) / result0l
 
 		count += 1
 		print "%d of %d done" % (count, total)
@@ -97,8 +101,9 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 	# write averages
 	line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param))
 	line += str(accum_hash/runs) + '\t'
-	line += str(accum_ubst/runs) + '\n' # changethis to a tab
-	# add line here
+	line += str(accum_ubst/runs) + '\n' 
+	#line += str(accum_list/runs) + '\n' 
+
 	outputfile.write(line)
 
 outputfile.close()
