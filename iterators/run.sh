@@ -10,6 +10,7 @@ cd ..
 # create a folder with the current time in the Output directory
 currentDate=`date +"%Y-%m-%d-%H-%M"`
 mkdir Output/$currentDate
+chmod 777 Output/$currentDate
 
 # run the tests
 python runTests.py
