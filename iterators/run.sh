@@ -20,3 +20,4 @@ gnuplot -e "outputDir='Output/$currentDate'" plot.gp.sh
 # move the output to the correct directory in Output
 mv config.txt output.txt output_verbose.txt Output/$currentDate
 
+
