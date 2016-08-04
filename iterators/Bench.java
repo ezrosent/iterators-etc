@@ -2,7 +2,7 @@ import java.util.Random;
 import java.text.DecimalFormat;
 import gnu.getopt.Getopt;
 
-class IteratorTest {
+class Bench {
     // Note that the total number of threads should be
     // no more than NUM_THREADS defined in SnapCollector.java
 
@@ -13,19 +13,23 @@ class IteratorTest {
     public static int REMOVE_PERCENT = 25;
     public static int KEY_RANGE = 4096;
     public static int INIT_SIZE = 1024;
+    public static String ALG_NAME = "list";
     
-    public static volatile BinarySearchTree set = null;
+    public static volatile SetInterface set = null;
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
     
     private static boolean ParseArgs(String [] args) {
-        Getopt g = new Getopt("", args, "i:u:d:I:R:M:s:h");
+        Getopt g = new Getopt("", args, "a:i:u:d:I:R:M:s:h");
         int c;
         String arg = null;
         while ((c = g.getopt()) != -1)
         {
             switch(c)
             {
+              case 'a':
+                ALG_NAME = g.getOptarg();
+                break;
               case 'i':
                 arg = g.getOptarg();
                 ITERATORS_NUM = Integer.parseInt(arg);
@@ -65,27 +69,33 @@ class IteratorTest {
     }
 
     private static void printHelp() {
+        System.out.println("  -a      set implementation (list, ubst, hash)");
         System.out.println("  -i      number of iterators");
         System.out.println("  -u      number of updaters");
         System.out.println("  -d      execution time");
         System.out.println("  -I      percentage of updates that are inserts");
-        System.out.println("  -R      percentage of updates that are removals");
+        System.out.println("  -D      percentage of updates that are deletes");
         System.out.println("  -M      maximum key value");
         System.out.println("  -s      initial size of hash table");
         System.out.println("  -h      print this help text");
     }
 
     private static void InitializeSet() {
-        IteratorTest.set = new BinarySearchTree();
+        if (ALG_NAME.equals("ubst"))
+            Bench.set = new BinarySearchTree();
+        else if (ALG_NAME.equals("hash"))
+            Bench.set = new CHashSet();
+        else
+            Bench.set = new CLinkedList();
 
         Random rng = new Random();
         for (int i = 0; i < INIT_SIZE; i++) {
             while (true) {
                 int key = rng.nextInt(KEY_RANGE);
-                if (set.insert(0, key))
+                if (set.insert(key, 0))
                     break;
             }
-	    //if (i % 10000 == 0) System.out.println(i + " elements initialised");
+	    //if (i % 10000 == 0) System.out.println(i + " elements initialized");
         }
     }
 
@@ -116,8 +126,8 @@ class IteratorTest {
 
         // wait for duration
         if (warmup)
-	    Thread.sleep(500);
-        else 
+            Thread.sleep(500);
+        else
             Thread.sleep(DURATION * 1000);
 
         // call time
@@ -148,16 +158,6 @@ class IteratorTest {
         for (int i = 0; i < iteratorThreads.length; i++)
             iterations += iteratorThreads[i].iterations;
 
-        /*
-        System.out.print("Time elapsed (ms): ");
-        System.out.println(new DecimalFormat("#.##").format(elapsed));
-        System.out.println("Inserts: " + inserts);
-        System.out.println("Removals: " + removals);
-        System.out.println("Contains: " + contains);
-        System.out.println("Iterations: " + iterations);
-        System.out.print("Throughput (ops/ms): ");
-        System.out.println(new DecimalFormat("#.##").format((double)(inserts + removals + contains) / elapsed));
-        */
         long totalOps = inserts + removals + contains;
         if (!warmup)
             System.out.println(totalOps);
@@ -171,6 +171,6 @@ class IteratorTest {
 
         // Run test
         RunTest(true);
-	RunTest(false);
+        RunTest(false);
     }
 }

@@ -8,11 +8,11 @@ class IteratorThread extends Thread {
     }
 
     public void run() {
-        BinarySearchTree set = IteratorTest.set;
+        SetInterface set = Bench.set;
 
-        while (!IteratorTest.begin);
+        while (!Bench.begin);
 
-        while (!IteratorTest.stop) {
+        while (!Bench.stop) {
             set.iterate(id);
             iterations += 1;
         }

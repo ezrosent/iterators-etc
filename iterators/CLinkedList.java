@@ -2,7 +2,7 @@ import java.util.concurrent.atomic.*;
 import java.util.List;
 import java.util.ArrayList;
 
-public class ListIT {
+public class CLinkedList implements SetInterface{
 
 	class Node
 	{
@@ -19,7 +19,7 @@ public class ListIT {
 	Node tail;
 	AtomicReference<SnapCollector<Node>> snapPointer;
 	
-	public ListIT() {
+	public CLinkedList() {
 
 		head = new Node(Integer.MIN_VALUE);
 		tail = new Node(Integer.MAX_VALUE);
@@ -72,7 +72,7 @@ public class ListIT {
 		}
 	}
 	
-	public boolean insert(int tid, int key) 
+	public boolean insert(int key, int tid) 
 	{
 		while (true)
 		{
@@ -105,7 +105,7 @@ public class ListIT {
 		}
 	}
 
-	public boolean delete(int tid, int key)
+	public boolean delete(int key, int tid)
 	{
 		boolean snip;
 		while (true)
@@ -135,7 +135,7 @@ public class ListIT {
 		}
 	}
 
-	public boolean contains(int tid, int key) {
+	public boolean search(int key, int tid) {
 		boolean[] marked = {false};
 		Node curr = head;
 		while (curr.key < key) { // search for the key

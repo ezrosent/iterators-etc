@@ -19,26 +19,26 @@ class UpdaterThread extends Thread {
     }
 
     public void run() {
-        int insertThresh = IteratorTest.INSERT_PERCENT;
-        int removeThresh = IteratorTest.INSERT_PERCENT + IteratorTest.REMOVE_PERCENT;
-        BinarySearchTree set = IteratorTest.set;
+        int insertThresh = Bench.INSERT_PERCENT;
+        int removeThresh = Bench.INSERT_PERCENT + Bench.REMOVE_PERCENT;
+        SetInterface set = Bench.set;
 
-        while (!IteratorTest.begin);
+        while (!Bench.begin);
 
-        while (!IteratorTest.stop) {
+        while (!Bench.stop) {
             int op = oprng.nextInt(100);
-            int key = keyrng.nextInt(IteratorTest.KEY_RANGE);
+            int key = keyrng.nextInt(Bench.KEY_RANGE);
 
             if (op < insertThresh) {
-                set.insert(id, key);
+                set.insert(key, id);
                 inserts += 1;
             }
             else if (op < removeThresh) {
-                set.delete(id, key);
+                set.delete(key, id);
                 removals += 1;
             }
             else {
-                set.search(id, key);
+                set.search(key, id);
                 contains += 1;
             }
         }

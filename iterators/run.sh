@@ -1,11 +1,13 @@
 # compile the data-structure codes
-cd hash
-javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
-cd ../ubst
-javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
-cd ../linked_list
-javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
-cd ..
+#cd hash
+#javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
+#cd ../ubst
+#javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
+#cd ../linked_list
+#javac -cp .:lib/java-getopt-1.0.13.jar IteratorTest.java
+#cd ..
+
+make -f Makefile
 
 # create a folder with the current time in the Output directory
 currentDate=`date +"%Y-%m-%d-%H-%M"`

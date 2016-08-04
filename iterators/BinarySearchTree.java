@@ -5,10 +5,10 @@ import java.util.concurrent.atomic.AtomicStampedReference;
 
 // Line numbers in comments refer to ListIT.java
 
-public class BinarySearchTree 
+public class BinarySearchTree implements SetInterface
 {
-	public Node root; //Node R
-	public Node leftChildOfRoot; //Node S
+	public TreeNode root; //Node R
+	public TreeNode leftChildOfRoot; //Node S
 
 	//The sentinel keys
 	//Other keys must be smaller than the sentinel keys
@@ -17,35 +17,35 @@ public class BinarySearchTree
 	private final int infty_2 = Integer.MAX_VALUE;
 
 	//Pointer to snap collector object
-	AtomicReference<SnapCollector<Node>> snapPointer;
+	AtomicReference<SnapCollector<TreeNode>> snapPointer;
 
 	//The initial tree as in Figure 3 of the paper 
 	public BinarySearchTree()
 	{
-		this.root = new Node(infty_2);						
-		this.leftChildOfRoot = new Node(infty_1);
+		this.root = new TreeNode(infty_2);						
+		this.leftChildOfRoot = new TreeNode(infty_1);
 
 		this.root.left.set(leftChildOfRoot, 0);
-		this.root.right.set(new Node(infty_2), 0);
+		this.root.right.set(new TreeNode(infty_2), 0);
 
-		this.leftChildOfRoot.left.set(new Node(infty_0), 0);
-		this.leftChildOfRoot.right.set(new Node(infty_1), 0);
+		this.leftChildOfRoot.left.set(new TreeNode(infty_0), 0);
+		this.leftChildOfRoot.right.set(new TreeNode(infty_1), 0);
 
-		SnapCollector<Node> dummy = new SnapCollector<Node>();
+		SnapCollector<TreeNode> dummy = new SnapCollector<TreeNode>();
 		dummy.BlockFurtherReports();
-		snapPointer = new AtomicReference<SnapCollector<Node>>(dummy);
+		snapPointer = new AtomicReference<SnapCollector<TreeNode>>(dummy);
 
 	}
 
-	public boolean isFlagged(AtomicStampedReference<Node> ref) {
+	public boolean isFlagged(AtomicStampedReference<TreeNode> ref) {
 		return (!((ref.getStamp() & 2) == 0));
 	}
 
-	public boolean isTagged(AtomicStampedReference<Node> ref) {
+	public boolean isTagged(AtomicStampedReference<TreeNode> ref) {
 		return (!((ref.getStamp() & 1) == 0));
 	}
 
-	public boolean isMarked(AtomicStampedReference<Node> ref) {
+	public boolean isMarked(AtomicStampedReference<TreeNode> ref) {
 		return (ref.getStamp() > 0);
 	}
 
@@ -57,9 +57,9 @@ public class BinarySearchTree
 		seekRecord.parent = this.leftChildOfRoot;
 		seekRecord.leaf = this.leftChildOfRoot.left.getReference();
 
-		AtomicStampedReference<Node> parentField = seekRecord.parent.left;
-		AtomicStampedReference<Node> currentField = seekRecord.leaf.left;
-		Node current = currentField.getReference();
+		AtomicStampedReference<TreeNode> parentField = seekRecord.parent.left;
+		AtomicStampedReference<TreeNode> currentField = seekRecord.leaf.left;
+		TreeNode current = currentField.getReference();
 
 		while (current != null)
 		{
@@ -86,7 +86,7 @@ public class BinarySearchTree
 		return seekRecord;
 	}
 
-	public boolean search(int tid, int key)
+	public boolean search(int key, int tid)
 	{
 		SeekRecord seekRecord = seek(key);
 
@@ -96,8 +96,8 @@ public class BinarySearchTree
 			 * if flagged report "remove" for "leaf"
 			 * else report "add" for "leaf"
 			 * */
-			AtomicStampedReference<Node> childPointer;
-			SnapCollector<Node> sc = snapPointer.get();
+			AtomicStampedReference<TreeNode> childPointer;
+			SnapCollector<TreeNode> sc = snapPointer.get();
 			if (seekRecord.parent.left.getReference() == seekRecord.leaf) {
 				childPointer = seekRecord.parent.left;
 			} else {
@@ -119,17 +119,17 @@ public class BinarySearchTree
 	}
 
 	//  take tid as well
-	public boolean insert(int tid, int key)
+	public boolean insert(int key, int tid)
 	{
 		while (true)
 		{
-			SnapCollector<Node> sc = snapPointer.get();
+			SnapCollector<TreeNode> sc = snapPointer.get();
 			SeekRecord seekRecord = seek(key);
 
-			Node parent = seekRecord.parent;
-			Node leaf = seekRecord.leaf;
+			TreeNode parent = seekRecord.parent;
+			TreeNode leaf = seekRecord.leaf;
 
-			AtomicStampedReference<Node> childAddr;
+			AtomicStampedReference<TreeNode> childAddr;
 			if (key < parent.key)
 				childAddr = parent.left;
 			else
@@ -138,18 +138,18 @@ public class BinarySearchTree
 			if (leaf.key != key)
 			{
 				//initialize newInternal and newLeaf appropriately
-				Node newLeaf = new Node(key);
-				Node newInternal;
+				TreeNode newLeaf = new TreeNode(key);
+				TreeNode newInternal;
 
 				if (key < leaf.key)
 				{
-					newInternal = new Node(leaf.key);
+					newInternal = new TreeNode(leaf.key);
 					newInternal.left.set(newLeaf, 0);
 					newInternal.right.set(leaf, 0);
 				}
 				else
 				{
-					newInternal = new Node(key);
+					newInternal = new TreeNode(key);
 					newInternal.left.set(leaf, 0);
 					newInternal.right.set(newLeaf, 0);				
 				}
@@ -175,11 +175,11 @@ public class BinarySearchTree
 				else
 				{
 					int[] marks = new int[1];
-					Node address;
+					TreeNode address;
 					address = childAddr.get(marks);
 
 					if (address == leaf && marks[0] > 0)
-						cleanup(tid, key, seekRecord);
+						cleanup(key, tid, seekRecord);
 				}
 			}
 			else {
@@ -196,17 +196,17 @@ public class BinarySearchTree
 		}
 	}
 
-	public boolean delete(int tid, int key)
+	public boolean delete(int key, int tid)
 	{
 		boolean mode = true; //true == INJECTION, false == CLEANUP		
-		Node leaf = null;
+		TreeNode leaf = null;
 
 		while (true)
 		{
 			SeekRecord seekRecord = seek(key);
-			Node parent = seekRecord.parent;
+			TreeNode parent = seekRecord.parent;
 
-			AtomicStampedReference<Node> childAddr;
+			AtomicStampedReference<TreeNode> childAddr;
 			if (key < parent.key)
 				childAddr = parent.left;
 			else
@@ -226,7 +226,7 @@ public class BinarySearchTree
 				if (result)
 				{
 					mode = false; //mode = CLEANUP
-					boolean done = cleanup(tid, key, seekRecord);
+					boolean done = cleanup(key, tid, seekRecord);
 					if (done) {
 						return true;
 					}
@@ -234,11 +234,11 @@ public class BinarySearchTree
 				else
 				{
 					int[] marks = new int[1];
-					Node address;
+					TreeNode address;
 					address = childAddr.get(marks);
 
 					if (address == leaf && isMarked(childAddr))
-						cleanup(tid, key, seekRecord);
+						cleanup(key, tid, seekRecord);
 				}
 			}
 			else //mode == CLEANUP
@@ -248,7 +248,7 @@ public class BinarySearchTree
 				}
 				else
 				{
-					boolean done = cleanup(tid, key, seekRecord);
+					boolean done = cleanup(key, tid, seekRecord);
 					if (done) {
 						return true;
 					}
@@ -257,21 +257,21 @@ public class BinarySearchTree
 		}
 	}
 
-	private boolean cleanup(int tid, int key, SeekRecord seekRecord)
+	private boolean cleanup(int key, int tid, SeekRecord seekRecord)
 	{
-		Node ancestor = seekRecord.ancestor;
-		Node successor = seekRecord.successor;
-		Node parent = seekRecord.parent;
+		TreeNode ancestor = seekRecord.ancestor;
+		TreeNode successor = seekRecord.successor;
+		TreeNode parent = seekRecord.parent;
 		//Node leaf = seekRecord.leaf;
 
-		AtomicStampedReference<Node> successorAddr;
+		AtomicStampedReference<TreeNode> successorAddr;
 		if (key < ancestor.key)
 			successorAddr = ancestor.left;
 		else
 			successorAddr = ancestor.right;
 
-		AtomicStampedReference<Node> childAddr; 
-		AtomicStampedReference<Node> siblingAddr; 
+		AtomicStampedReference<TreeNode> childAddr; 
+		AtomicStampedReference<TreeNode> siblingAddr; 
 		if (key < parent.key)
 		{
 			childAddr = parent.left;
@@ -291,7 +291,7 @@ public class BinarySearchTree
 		//But it may have performance/progress issues?
 		boolean complete = false;
 		int[] marks = new int[1];
-		Node address;
+		TreeNode address;
 		while (!complete)
 		{
 			address = siblingAddr.get(marks);
@@ -316,7 +316,7 @@ public class BinarySearchTree
 		complete = successorAddr.compareAndSet(successor, address, 0, flag);
 		if (complete) {
 			// Physical removal: Report childAddr.node
-			SnapCollector<Node> sc = snapPointer.get();
+			SnapCollector<TreeNode> sc = snapPointer.get();
 			if (sc.IsActive()) {
 				sc.Report(tid, childAddr.getReference(), ReportType.add, key);
 			}
@@ -325,8 +325,8 @@ public class BinarySearchTree
 	}
 
 	// Snapcollector stuff below this
-	public SnapCollector<Node> GetSnapshot(int tid) {
-		SnapCollector<Node> sc = AcquireSnapCollector();
+	public SnapCollector<TreeNode> GetSnapshot(int tid) {
+		SnapCollector<TreeNode> sc = AcquireSnapCollector();
 		CollectSnapshot(sc);
 		sc.Prepare(tid);
 		return sc;
@@ -334,11 +334,11 @@ public class BinarySearchTree
 
 	// This function figures out if a new snap collector is to be created
 	// or build on the old existing one
-	private SnapCollector<Node> AcquireSnapCollector() {
-		SnapCollector<Node> result = null;
+	private SnapCollector<TreeNode> AcquireSnapCollector() {
+		SnapCollector<TreeNode> result = null;
 		result = snapPointer.get();
 		if (!result.IsActive()) {
-			SnapCollector<Node> candidate = new SnapCollector<Node>();
+			SnapCollector<TreeNode> candidate = new SnapCollector<TreeNode>();
 			if (snapPointer.compareAndSet(result, candidate))
 				result = candidate;
 			else
@@ -348,7 +348,7 @@ public class BinarySearchTree
 	}
 
 	// TODO: check for sc.isActive is missing -- Line 179
-	public void dfs(AtomicStampedReference<Node> node, SnapCollector<Node> sc) {
+	public void dfs(AtomicStampedReference<TreeNode> node, SnapCollector<TreeNode> sc) {
 		if(!sc.IsActive()) {
 			return;
 		}
@@ -357,8 +357,8 @@ public class BinarySearchTree
 			sc.Deactivate();
 			return;
 		}
-		AtomicStampedReference<Node> leftChild = node.getReference().left;
-		AtomicStampedReference<Node> rightChild = node.getReference().right;
+		AtomicStampedReference<TreeNode> leftChild = node.getReference().left;
+		AtomicStampedReference<TreeNode> rightChild = node.getReference().right;
 		if ((leftChild.getReference() == null) && (rightChild.getReference() == null)) { // found a leaf
 			if (!isFlagged(node)) {
 				sc.AddNode(node.getReference(), node.getReference().key);
@@ -373,7 +373,7 @@ public class BinarySearchTree
 		}
 	}
 
-	private void CollectSnapshot(SnapCollector<Node> sc) {
+	private void CollectSnapshot(SnapCollector<TreeNode> sc) {
 		// get the root of the actual tree
 		dfs(leftChildOfRoot.left, sc);
 		sc.BlockFurtherReports();
@@ -383,8 +383,8 @@ public class BinarySearchTree
 	public List<Integer> iterate(int tid) {
 		List<Integer> list = new ArrayList<Integer>();
 
-		SnapCollector<Node> snap = GetSnapshot(tid);
-		Node curr;
+		SnapCollector<TreeNode> snap = GetSnapshot(tid);
+		TreeNode curr;
 		while ((curr = snap.GetNext(tid)) != null) {
 			list.add(curr.key);
 		}

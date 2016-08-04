@@ -1,19 +1,19 @@
 import java.util.concurrent.atomic.*;
 import java.util.*;
 
-class LFArrayFSet
+class FSet
 {
     // field updater for head
-    private static AtomicReferenceFieldUpdater<LFArrayFSet, Object> headUpdater
-        = AtomicReferenceFieldUpdater.newUpdater(LFArrayFSet.class, Object.class, "head");
+    private static AtomicReferenceFieldUpdater<FSet, Object> headUpdater
+        = AtomicReferenceFieldUpdater.newUpdater(FSet.class, Object.class, "head");
 
     public volatile Object head;
 
     static class FreezeMarker
     {
-        public Node [] arr;
+        public HashNode [] arr;
 
-        public FreezeMarker(Node [] a)
+        public FreezeMarker(HashNode [] a)
         {
             arr = a;
         }
@@ -22,8 +22,8 @@ class LFArrayFSet
     // This class is just used to return multiple values from arrayInsert and arrayRemove
     static class Wrapper 
     {
-    	public Node[] arr; // new FSet created by arrayInsert and arrayRemove
-    	public Node node; // node that is being inserted or deleted
+    	public HashNode[] arr; // new FSet created by arrayInsert and arrayRemove
+    	public HashNode node; // node that is being inserted or deleted
     	
     	public Wrapper() {
     		arr = null;
@@ -38,26 +38,26 @@ class LFArrayFSet
     }
 
     // default constructor
-    public LFArrayFSet()
+    public FSet()
     {
-        head = new Node[0];
+        head = new HashNode[0];
     }
 
     // copy constructor
-    public LFArrayFSet(Node [] arr)
+    public FSet(HashNode [] arr)
     {
         head = arr;
     }
 
     // TODO: pass snapcollector here as a parameter
-    public int invoke(int tid, boolean insert, int key, SnapCollector<Node> sc)
+    public int invoke(int tid, boolean insert, int key, SnapCollector<HashNode> sc)
     {
         Object h = head;
         Wrapper ret;
-        while (h instanceof Node []) {
-        	Node [] o = (Node [])h;
+        while (h instanceof HashNode []) {
+        	HashNode [] o = (HashNode [])h;
         	ret = insert ? arrayInsert(o, key) : arrayRemove(o, key);
-        	Node [] n = ret.arr;
+        	HashNode [] n = ret.arr;
             if (n == o) 
                 return -(n.length + 1);
             else if (casHead(h, n)) {
@@ -77,8 +77,8 @@ class LFArrayFSet
     public boolean hasMember(int key)
     {
         Object h = head;
-        Node [] arr = (h instanceof Node [])
-            ? (Node [])h
+        HashNode [] arr = (h instanceof HashNode [])
+            ? (HashNode [])h
             : ((FreezeMarker)h).arr;
         return arrayContains(arr, key);
     }
@@ -89,55 +89,55 @@ class LFArrayFSet
             Object h = head;
             if (h instanceof FreezeMarker)
                 return;
-            FreezeMarker m = new FreezeMarker((Node [])h);
+            FreezeMarker m = new FreezeMarker((HashNode [])h);
             if (casHead(h, m))
                 return;
         }
     }
 
-    public LFArrayFSet split(int size, int remainder)
+    public FSet split(int size, int remainder)
     {
-    	Node [] o = ((FreezeMarker)head).arr;
+    	HashNode [] o = ((FreezeMarker)head).arr;
 
         int count = 0;
         for (int i = 0; i < o.length; i++)
             if (o[i].key % size == remainder)
                 count++;
 
-        Node [] n = new Node[count];
+        HashNode [] n = new HashNode[count];
         int j = 0;
         for (int i = 0; i < o.length; i++) {
             if (o[i].key % size == remainder)
                 n[j++] = o[i];
         }
 
-        return new LFArrayFSet(n);
+        return new FSet(n);
     }
     
-    public LFArrayFSet merge(LFArrayFSet t2)
+    public FSet merge(FSet t2)
     {
-    	Node [] p = ((FreezeMarker)head).arr;
-    	Node [] q = ((FreezeMarker)t2.head).arr;
+    	HashNode [] p = ((FreezeMarker)head).arr;
+    	HashNode [] q = ((FreezeMarker)t2.head).arr;
 
-    	Node [] n = new Node[p.length + q.length];
+    	HashNode [] n = new HashNode[p.length + q.length];
         int j = 0;
         for (int i = 0; i < p.length; i++)
             n[j++] = p[i];
         for (int i = 0; i < q.length; i++)
             n[j++] = q[i];
 
-        return new LFArrayFSet(n);
+        return new FSet(n);
     }
     
     
-    public LFArrayFSet splitForIterate(int size, int remainder)
+    public FSet splitForIterate(int size, int remainder)
     {
     	Object h = head;
-    	Node[] o;
+    	HashNode[] o;
     	if (h instanceof FreezeMarker) {
     	    o = ((FreezeMarker)h).arr;
     	} else {
-    		o = (Node [])h;
+    		o = (HashNode [])h;
     	}
 
         int count = 0;
@@ -145,63 +145,63 @@ class LFArrayFSet
             if (o[i].key % size == remainder)
                 count++;
 
-        Node [] n = new Node[count];
+        HashNode [] n = new HashNode[count];
         int j = 0;
         for (int i = 0; i < o.length; i++) {
             if (o[i].key % size == remainder)
                 n[j++] = o[i];
         }
 
-        return new LFArrayFSet(n);
+        return new FSet(n);
     }
 
-    public LFArrayFSet mergeForIterate(LFArrayFSet t2)
+    public FSet mergeForIterate(FSet t2)
     {
     	Object h = head;
-    	Node[] p;
+    	HashNode[] p;
     	if (h instanceof FreezeMarker) {
     	    p = ((FreezeMarker)h).arr;
     	} else {
-    		p = (Node [])h;
+    		p = (HashNode [])h;
     	}
    
     	h = t2.head;
-    	Node [] q;
+    	HashNode [] q;
     	if (h instanceof FreezeMarker) {
     	    q = ((FreezeMarker)h).arr;
     	} else {
-    		q = (Node [])h;
+    		q = (HashNode [])h;
     	}
 
-    	Node [] n = new Node[p.length + q.length];
+    	HashNode [] n = new HashNode[p.length + q.length];
         int j = 0;
         for (int i = 0; i < p.length; i++)
             n[j++] = p[i];
         for (int i = 0; i < q.length; i++)
             n[j++] = q[i];
 
-        return new LFArrayFSet(n);
+        return new FSet(n);
     }
 
     public void print()
     {
         Object h = head;
-        Node [] arr = null;
+        HashNode [] arr = null;
 
         if (h instanceof FreezeMarker) {
             System.out.print("(F) ");
             arr = ((FreezeMarker)h).arr;
         }
         else {
-            arr = (Node [])h;
+            arr = (HashNode [])h;
         }
 
-        for (Node i : arr)
+        for (HashNode i : arr)
             System.out.print(Integer.toString(i.key) + " ");
         System.out.println();
     }
 
-    private static boolean arrayContains(Node [] o, int key)
+    private static boolean arrayContains(HashNode [] o, int key)
     {
         for (int i = 0; i < o.length; i++) {
             if (o[i].key == key)
@@ -212,7 +212,7 @@ class LFArrayFSet
 
     // TODO: take one more parameter, say LFArrayFSetNode node
     // this parameter returns the node which is inserted
-    private static Wrapper arrayInsert(Node [] o, int key)
+    private static Wrapper arrayInsert(HashNode [] o, int key)
     {
     	Wrapper ret = new Wrapper();
         if (arrayContains(o, key)) {
@@ -220,11 +220,11 @@ class LFArrayFSet
         	ret.node = null;
             return ret;
         }
-        Node [] n = new Node[o.length + 1];
+        HashNode [] n = new HashNode[o.length + 1];
         for (int i = 0; i < o.length; i++)
             n[i] = o[i];
         
-        n[n.length - 1] = new Node();
+        n[n.length - 1] = new HashNode();
         n[n.length - 1].key = key;
         
         ret.arr = n;
@@ -234,7 +234,7 @@ class LFArrayFSet
 
     // TODO: take one more parameter, say LFArrayFSetNode node
     // this parameter returns the node which is being deleted
-    private static Wrapper arrayRemove(Node [] o, int key)
+    private static Wrapper arrayRemove(HashNode [] o, int key)
     {
     	Wrapper ret = new Wrapper();
         if (!arrayContains(o, key)) {
@@ -242,7 +242,7 @@ class LFArrayFSet
         	ret.node = null;
             return ret;
         }
-        Node [] n = new Node[o.length - 1];
+        HashNode [] n = new HashNode[o.length - 1];
         int j = 0;
         for (int i = 0; i < o.length; i++) {
             if (o[i].key != key) {

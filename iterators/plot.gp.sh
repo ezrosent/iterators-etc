@@ -6,17 +6,17 @@ reset
 # number of lines in one plot : ie, number of data structures
 nLines = 2 # should be 3 when including LL
 nIterators = "`head -1 config.txt`"
-nUpdators = "`head -2 config.txt | tail -1`"
+nUpdaters = "`head -2 config.txt | tail -1`"
 nDuration = "`head -3 config.txt | tail -1`"
 nWeightConfig = "`head -4 config.txt | tail -1`"
 
 #print nIterators
-#print nUpdators
+#print nUpdaters
 #print nDuration
 #print nWeightConfig
 
 firstLine = 1
-lastLine = firstLine + (words(nUpdators) * words(nDuration) * words(nWeightConfig)) - 1
+lastLine = firstLine + (words(nUpdaters) * words(nDuration) * words(nWeightConfig)) - 1
 increment = words(nDuration) * words(nWeightConfig)
 
 # the starting column of time parameter. Before this column are the benchmark parameters.
@@ -55,12 +55,12 @@ do for [l=1:nMultiplots] {
     unset key
 
     # fix the values on x-axis
-    #set xtics nUpdators
+    #set xtics nUpdaters
 
     # fix the values on y-axis
     set yrange[0.0:1.5]
 
-    set xlabel "Number of updators" font ", 16" #font "Times New Roman, 8"
+    set xlabel "Number of updaters" font ", 16" #font "Times New Roman, 8"
     set ylabel "Slowdown" font ", 16" #font "Times New Roman, 8"
     #set key at 0,0 horizontal box
     unset key
@@ -80,7 +80,7 @@ do for [l=1:nMultiplots] {
     }
 
     firstLine = lastLine + 1
-    lastLine = firstLine + (words(nUpdators) * words(nDuration) * words(nWeightConfig)) - 1
+    lastLine = firstLine + (words(nUpdaters) * words(nDuration) * words(nWeightConfig)) - 1
 
 
     #############################################

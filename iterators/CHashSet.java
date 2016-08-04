@@ -1,7 +1,7 @@
 import java.util.concurrent.atomic.*;
 import java.util.*;
 
-class LFArrayHashSet implements ISet
+class CHashSet implements SetInterface
 {
 	static class HNode
 	{
@@ -9,7 +9,7 @@ class LFArrayHashSet implements ISet
 		public HNode old;
 
 		// bucket array
-		public AtomicReferenceArray<LFArrayFSet> buckets;
+		public AtomicReferenceArray<FSet> buckets;
 
 		// store the size [for convenience]
 		public final int size;
@@ -19,7 +19,7 @@ class LFArrayHashSet implements ISet
 		{
 			old = o;
 			size = s;
-			buckets = new AtomicReferenceArray<LFArrayFSet>(size);
+			buckets = new AtomicReferenceArray<FSet>(size);
 		}
 	}
 
@@ -30,19 +30,19 @@ class LFArrayHashSet implements ISet
 	volatile HNode head;
 
 	//Pointer to snap collector object
-	AtomicReference<SnapCollector<Node>> snapPointer;
+	AtomicReference<SnapCollector<HashNode>> snapPointer;
 
 	// field updater for head
-	private static AtomicReferenceFieldUpdater<LFArrayHashSet, HNode> headUpdater
-	= AtomicReferenceFieldUpdater.newUpdater(LFArrayHashSet.class, HNode.class, "head");
+	private static AtomicReferenceFieldUpdater<CHashSet, HNode> headUpdater
+	= AtomicReferenceFieldUpdater.newUpdater(CHashSet.class, HNode.class, "head");
 
-	public LFArrayHashSet()
+	public CHashSet()
 	{
 		head = new HNode(null, MIN_BUCKET_NUM);
-		head.buckets.set(0, new LFArrayFSet());
-		SnapCollector<Node> dummy = new SnapCollector<Node>();
+		head.buckets.set(0, new FSet());
+		SnapCollector<HashNode> dummy = new SnapCollector<HashNode>();
 		dummy.BlockFurtherReports();
-		snapPointer = new AtomicReference<SnapCollector<Node>>(dummy);
+		snapPointer = new AtomicReference<SnapCollector<HashNode>>(dummy);
 	}
 
 	public boolean insert(int key, int tid)
@@ -54,16 +54,16 @@ class LFArrayHashSet implements ISet
 		return result > 0;
 	}
 
-	public boolean remove(int key, int tid)
+	public boolean delete(int key, int tid)
 	{
 		int result = apply(tid, false, key);
 		return result > 0;
 	}
 
-	public boolean contains(int key)
+	public boolean search(int key, int tid)
 	{
 		HNode t = head;
-		LFArrayFSet b = t.buckets.get(key % t.size);
+		FSet b = t.buckets.get(key % t.size);
 		// if the b is empty, use old table
 		if (b == null) {
 			HNode s = t.old;
@@ -79,7 +79,7 @@ class LFArrayHashSet implements ISet
 		return apply(tid, true, key) > 0;
 	}
 
-	public boolean simpleRemove(int key, int tid)
+	public boolean simpleDelete(int key, int tid)
 	{
 		return apply(tid, false, key) > 0;
 	}
@@ -121,11 +121,11 @@ class LFArrayHashSet implements ISet
 
 	private int apply(int tid, boolean insert, int key)
 	{
-		SnapCollector<Node> sc = snapPointer.get();
+		SnapCollector<HashNode> sc = snapPointer.get();
 		while (true) {
 			HNode       t = head;
 			int         i = key % t.size;
-			LFArrayFSet b = t.buckets.get(i);
+			FSet b = t.buckets.get(i);
 
 			// response value
 			int ret = 0;
@@ -165,18 +165,18 @@ class LFArrayHashSet implements ISet
 
 	private void helpResize(HNode t, int i)
 	{
-		LFArrayFSet b = t.buckets.get(i);
+		FSet b = t.buckets.get(i);
 		HNode s = t.old;
 		if (b == null && s != null) {
-			LFArrayFSet set = null;
+			FSet set = null;
 			if (s.size * 2 == t.size) /* growing */ {
-				LFArrayFSet p = s.buckets.get(i % s.size);
+				FSet p = s.buckets.get(i % s.size);
 				p.freeze();
 				set = p.split(t.size, i);
 			}
 			else /* shrinking */ {
-				LFArrayFSet p = s.buckets.get(i);
-				LFArrayFSet q = s.buckets.get(i + t.size);
+				FSet p = s.buckets.get(i);
+				FSet q = s.buckets.get(i + t.size);
 				p.freeze();
 				q.freeze();
 				set = p.merge(q);
@@ -193,7 +193,7 @@ class LFArrayHashSet implements ISet
 
 	// Snap collector code
 
-	private void CollectSnapshot(SnapCollector<Node> sc) {
+	private void CollectSnapshot(SnapCollector<HashNode> sc) {
 		// TODO: write the iterate logic here
 		/* 
 		 * cur = head // extract the current hash set
@@ -210,26 +210,26 @@ class LFArrayHashSet implements ISet
 		
 		for (int i = 0; i < t.size && sc.IsActive(); i++) {
 			// get the i-th bucket
-			LFArrayFSet b = t.buckets.get(i);
+			FSet b = t.buckets.get(i);
 			if ((b == null) && (s != null)) {
 				// compute the corresponding bucket in s
 				if (s.size * 2 == t.size) /* growing */ {
-					LFArrayFSet p = s.buckets.get(i % s.size);
+					FSet p = s.buckets.get(i % s.size);
 					b = p.splitForIterate(t.size, i);
 				} else {
-					LFArrayFSet p = s.buckets.get(i);
-					LFArrayFSet q = s.buckets.get(i + t.size);
+					FSet p = s.buckets.get(i);
+					FSet q = s.buckets.get(i + t.size);
 					b = p.mergeForIterate(q);
 				}
 			}
 			else {
 				// Make a copy of the bucket for iteration
-				b = new LFArrayFSet((Node [])(t.buckets.get(i).head));
+				b = new FSet((HashNode [])(t.buckets.get(i).head));
 			}
 			// iterate b
                         //System.out.println("Bucket size: " + ((Node [])(b.head)).length);
-			for (int j = 0; j < ((Node [])(b.head)).length; j++) {
-				sc.AddNode(((Node [])(b.head))[j], ((Node [])(b.head))[j].key);
+			for (int j = 0; j < ((HashNode [])(b.head)).length; j++) {
+				sc.AddNode(((HashNode [])(b.head))[j], ((HashNode [])(b.head))[j].key);
 				//System.out.println("Succesfully added "+ ((Node [])(b.head))[j].key);
 			}
 		}
@@ -238,18 +238,18 @@ class LFArrayHashSet implements ISet
 		sc.BlockFurtherReports();
 	}
 
-	public SnapCollector<Node> GetSnapshot(int tid) {
-		SnapCollector<Node> sc = AcquireSnapCollector();
+	public SnapCollector<HashNode> GetSnapshot(int tid) {
+		SnapCollector<HashNode> sc = AcquireSnapCollector();
 		CollectSnapshot(sc);
 		sc.Prepare(tid);
 		return sc;
 	}
 
-	private SnapCollector<Node> AcquireSnapCollector() {
-		SnapCollector<Node> result = null;
+	private SnapCollector<HashNode> AcquireSnapCollector() {
+		SnapCollector<HashNode> result = null;
 		result = snapPointer.get();
 		if (!result.IsActive()) {
-			SnapCollector<Node> candidate = new SnapCollector<Node>();
+			SnapCollector<HashNode> candidate = new SnapCollector<HashNode>();
 			if (snapPointer.compareAndSet(result, candidate))
 				result = candidate;
 			else
@@ -260,9 +260,9 @@ class LFArrayHashSet implements ISet
 
 	// Calculates size via iteration.
 	public int size(int tid) {
-		SnapCollector<Node> snap = GetSnapshot(tid);
+		SnapCollector<HashNode> snap = GetSnapshot(tid);
 		int result = 0;
-		Node curr;
+		HashNode curr;
 		while ((curr = snap.GetNext(tid)) != null) {
 			result++;
 		}
@@ -273,8 +273,8 @@ class LFArrayHashSet implements ISet
 	public List<Integer> iterate(int tid) {
 		List<Integer> list = new ArrayList<Integer>();
 
-		SnapCollector<Node> snap = GetSnapshot(tid);
-		Node curr;
+		SnapCollector<HashNode> snap = GetSnapshot(tid);
+		HashNode curr;
 		while ((curr = snap.GetNext(tid)) != null) {
 			list.add(curr.key);
 		}

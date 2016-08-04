@@ -1,12 +1,13 @@
 from subprocess import Popen, PIPE
 import itertools
 
+ALGS = ["hash", "ubst", "list"]
 ITERATORS_NUM = [1] # Compare against 0
-UPDATERS_NUM = [1, 2, 3, 4, 5, 6, 7] #[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
-DURATION = [4]
-PERCENTAGES = [(25, 25, 50) , (20, 10, 70), (50, 50, 0)]
-KEY_RANGE = [10000000]
-INIT_SIZE = [500000]
+UPDATERS_NUM = [1, 2]  #[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
+DURATION = [2]
+PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
+KEY_RANGE = [4000]
+INIT_SIZE = [1000]
 runs = 1
 
 # Maybe sanitize inputs here
@@ -27,16 +28,18 @@ configfile.write(' '.join(map(str, INIT_SIZE)) + '\n')
 configfile.close()
 
 # Open file, write header
+header_end = reduce(lambda x, y: x + y, map(lambda s: '\t' + s.upper(), ALGS)) + '\n'
 outputfile = open("output.txt", 'w')
-outputfile.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT\tHASH\tUBST\tLL\n")
+outputfile.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT" + header_end)
 verbose = open("output_verbose.txt", 'w')
-verbose.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT\tRUN\tHASH\tUBST\tLL\n")
+verbose.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT\tRUN" + header_end)
 
 PARAMETER_COMBINATIONS = [ITERATORS_NUM, UPDATERS_NUM, DURATION, PERCENTAGES, KEY_RANGE, INIT_SIZE]
 
 # Iterate through all combinations
 def makeargs(param, alg, i):
-	args = ["java", "-cp", ("%s:%s/lib/java-getopt-1.0.13.jar") % (alg, alg), "IteratorTest"]
+	args = ["java", "-cp", (".:lib/java-getopt-1.0.13.jar"), "Bench"]
+	args += ["-a", alg]
 	args += ["-i", str(i)]
 	args += ["-u", str(param[1])]
 	args += ["-d", str(param[2])]
@@ -60,49 +63,30 @@ def to_str(data):
 
 # main loop
 for param in itertools.product(*PARAMETER_COMBINATIONS):
-	accum_hash = 0
-	accum_ubst = 0
-	#accum_list = 0
+	accum = {a:0 for a in ALGS}
 	for r in xrange(runs):
-		# Compare each run against identical run with no iterators
-		# hash table
-		pTest0h = Popen(makeargs(param, "hash", 0), stdout=PIPE)
-		result0h = int(pTest0h.communicate()[0].strip())
-		pTest1h = Popen(makeargs(param, "hash", param[0]), stdout=PIPE)
-		result1h = int(pTest1h.communicate()[0].strip())
-
-		# unbalanced binary search tree
-		pTest0b = Popen(makeargs(param, "ubst", 0), stdout=PIPE)
-		result0b = int(pTest0b.communicate()[0].strip())
-		pTest1b = Popen(makeargs(param, "ubst", param[0]), stdout=PIPE)
-		result1b = int(pTest1b.communicate()[0].strip())
-		
-		#linked list 
-		#pTest0l = Popen(makeargs(param, "linked_list", 0), stdout=PIPE)
-		#result0l = int(pTest0l.communicate()[0].strip())
-		#pTest1l = Popen(makeargs(param, "linked_list", param[0]), stdout=PIPE)
-		#result1l = int(pTest1l.communicate()[0].strip())
+		result_str = ""
+		for alg in ALGS:
+			pTest0 = Popen(makeargs(param, alg, 0), stdout=PIPE)
+			result0 = int(pTest0.communicate()[0].strip())
+			pTest1 = Popen(makeargs(param, alg, param[0]), stdout=PIPE)
+			result1 = int(pTest1.communicate()[0].strip())
+			accum[alg] += float(result1) / result0
+			result_str += '\t' + str(float(result1) / result0)
 
 		# calculate/write verbose output
-		line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param + (r+1,)))
-		line += str(float(result1h)/result0h) + '\t'
-		line += str(float(result1b)/result0b) + '\n'
-		#line += str(float(result1l)/result0l) + '\n' 
+		line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param + (r+1,))).strip()
+		line += result_str + '\n'
 		verbose.write(line)
-
-		# accumulate to calculate an average over runs
-		accum_hash += float(result1h) / result0h
-		accum_ubst += float(result1b) / result0b
-		#accum_list += float(result1l) / result0l
 
 		count += 1
 		print "%d of %d done" % (count, total)
 
 	# write averages
-	line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param))
-	line += str(accum_hash/runs) + '\t'
-	line += str(accum_ubst/runs) + '\n' 
-	#line += str(accum_list/runs) + '\n' 
+	line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param)).strip()
+	for alg in ALGS:
+		line += '\t' + str(accum[alg]/runs)
+	line += '\n'
 
 	outputfile.write(line)
 
