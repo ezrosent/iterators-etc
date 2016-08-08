@@ -14,14 +14,14 @@ class Bench {
     public static int KEY_RANGE = 4096;
     public static int INIT_SIZE = 1024;
     public static String ALG_NAME = "list";
-    public static boolean DEACTIVATE = true;
+    public static boolean DEACTIVATE = false;
     
     public static volatile SetInterface set = null;
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
     
     private static boolean ParseArgs(String [] args) {
-        Getopt g = new Getopt("", args, "a:i:u:d:I:R:M:s:h");
+        Getopt g = new Getopt("", args, "a:i:u:d:I:R:M:s:T?h");
         int c;
         String arg = null;
         while ((c = g.getopt()) != -1)
@@ -60,8 +60,8 @@ class Bench {
                 INIT_SIZE = Integer.parseInt(arg);
                 break;
 	      case 'T':
-		arg = g.getOptarg();
-		DEACTIVATE = Boolean.parseBoolean(arg);
+		DEACTIVATE = true;
+                break;
               case 'h':
                 printHelp();
                 return false;
