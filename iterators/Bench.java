@@ -14,6 +14,7 @@ class Bench {
     public static int KEY_RANGE = 4096;
     public static int INIT_SIZE = 1024;
     public static String ALG_NAME = "list";
+    public static boolean DEACTIVATE = true;
     
     public static volatile SetInterface set = null;
     public static volatile boolean begin = false;
@@ -58,6 +59,9 @@ class Bench {
                 arg = g.getOptarg();
                 INIT_SIZE = Integer.parseInt(arg);
                 break;
+	      case 'T':
+		arg = g.getOptarg();
+		DEACTIVATE = Boolean.parseBoolean(arg);
               case 'h':
                 printHelp();
                 return false;
@@ -82,11 +86,11 @@ class Bench {
 
     private static void InitializeSet() {
         if (ALG_NAME.equals("ubst"))
-            Bench.set = new BinarySearchTree();
+            Bench.set = new BinarySearchTree(DEACTIVATE);
         else if (ALG_NAME.equals("hash"))
-            Bench.set = new CHashSet();
+            Bench.set = new CHashSet(DEACTIVATE);
         else
-            Bench.set = new CLinkedList();
+            Bench.set = new CLinkedList(DEACTIVATE);
 
         Random rng = new Random();
         for (int i = 0; i < INIT_SIZE; i++) {

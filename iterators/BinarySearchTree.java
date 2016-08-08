@@ -20,7 +20,7 @@ public class BinarySearchTree implements SetInterface
 	AtomicReference<SnapCollector<TreeNode>> snapPointer;
 
 	//The initial tree as in Figure 3 of the paper 
-	public BinarySearchTree()
+	public BinarySearchTree(boolean deactivate)
 	{
 		this.root = new TreeNode(infty_2);						
 		this.leftChildOfRoot = new TreeNode(infty_1);
@@ -33,7 +33,9 @@ public class BinarySearchTree implements SetInterface
 
 		SnapCollector<TreeNode> dummy = new SnapCollector<TreeNode>();
 		dummy.BlockFurtherReports();
-		dummy.Deactivate();
+		if (deactivate) {
+		    dummy.Deactivate();
+		}
 		snapPointer = new AtomicReference<SnapCollector<TreeNode>>(dummy);
 
 	}

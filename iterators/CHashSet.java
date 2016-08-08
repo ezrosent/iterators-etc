@@ -36,13 +36,15 @@ class CHashSet implements SetInterface
 	private static AtomicReferenceFieldUpdater<CHashSet, HNode> headUpdater
 	= AtomicReferenceFieldUpdater.newUpdater(CHashSet.class, HNode.class, "head");
 
-	public CHashSet()
+	public CHashSet(boolean deactivate)
 	{
 		head = new HNode(null, MIN_BUCKET_NUM);
 		head.buckets.set(0, new FSet());
 		SnapCollector<HashNode> dummy = new SnapCollector<HashNode>();
 		dummy.BlockFurtherReports();
-		dummy.Deactivate();
+		if (deactivate) {
+		    dummy.Deactivate();
+		}
 		snapPointer = new AtomicReference<SnapCollector<HashNode>>(dummy);
 	}
 

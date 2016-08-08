@@ -19,7 +19,7 @@ public class CLinkedList implements SetInterface{
 	Node tail;
 	AtomicReference<SnapCollector<Node>> snapPointer;
 	
-	public CLinkedList() {
+	public CLinkedList(boolean deactivate) {
 
 		head = new Node(Integer.MIN_VALUE);
 		tail = new Node(Integer.MAX_VALUE);
@@ -28,7 +28,9 @@ public class CLinkedList implements SetInterface{
 		
 		SnapCollector<Node> dummy = new SnapCollector<Node>();
 		dummy.BlockFurtherReports();
-		dummy.Deactivate();
+		if (deactivate) {
+		    dummy.Deactivate();
+		}
 		snapPointer = new AtomicReference<SnapCollector<Node>>(dummy);
 
 	}
