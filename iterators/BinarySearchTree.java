@@ -33,6 +33,7 @@ public class BinarySearchTree implements SetInterface
 
 		SnapCollector<TreeNode> dummy = new SnapCollector<TreeNode>();
 		dummy.BlockFurtherReports();
+		dummy.Deactivate();
 		snapPointer = new AtomicReference<SnapCollector<TreeNode>>(dummy);
 
 	}

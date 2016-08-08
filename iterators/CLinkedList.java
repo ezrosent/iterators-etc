@@ -28,6 +28,7 @@ public class CLinkedList implements SetInterface{
 		
 		SnapCollector<Node> dummy = new SnapCollector<Node>();
 		dummy.BlockFurtherReports();
+		dummy.Deactivate();
 		snapPointer = new AtomicReference<SnapCollector<Node>>(dummy);
 
 	}
@@ -179,6 +180,11 @@ public class CLinkedList implements SetInterface{
 		while (sc.IsActive()) {
 			if (!curr.next.isMarked())
 				curr = sc.AddNode(curr, curr.key);
+			if (curr == null) {
+				sc.BlockFurtherPointers();
+				sc.Deactivate();
+				break;
+			}
 			if (curr.key == Integer.MAX_VALUE) {
 				sc.BlockFurtherPointers();
 				sc.Deactivate();

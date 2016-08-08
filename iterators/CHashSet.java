@@ -42,6 +42,7 @@ class CHashSet implements SetInterface
 		head.buckets.set(0, new FSet());
 		SnapCollector<HashNode> dummy = new SnapCollector<HashNode>();
 		dummy.BlockFurtherReports();
+		dummy.Deactivate();
 		snapPointer = new AtomicReference<SnapCollector<HashNode>>(dummy);
 	}
 

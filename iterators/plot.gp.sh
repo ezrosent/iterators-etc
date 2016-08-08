@@ -4,7 +4,7 @@ reset
 # set term dumb
 
 # number of lines in one plot : ie, number of data structures
-nLines = 2 # should be 3 when including LL
+nLines = 3 # should be 3 when including LL
 nIterators = "`head -1 config.txt`"
 nUpdaters = "`head -2 config.txt | tail -1`"
 nDuration = "`head -3 config.txt | tail -1`"
@@ -55,7 +55,7 @@ do for [l=1:nMultiplots] {
     unset key
 
     # fix the values on x-axis
-    #set xtics nUpdaters
+    set xtics nUpdaters
 
     # fix the values on y-axis
     set yrange[0.0:1.5]
