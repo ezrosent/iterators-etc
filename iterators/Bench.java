@@ -9,19 +9,19 @@ class Bench {
     public static int ITERATORS_NUM = 1;
     public static int UPDATERS_NUM = 24;
     public static int DURATION = 5;
-    public static int INSERT_PERCENT = 25;
-    public static int REMOVE_PERCENT = 25;
+
     public static int KEY_RANGE = 4096;
     public static int INIT_SIZE = 1024;
     public static String ALG_NAME = "list";
     public static boolean DEACTIVATE = false;
+    public static String OP_FILE = "op_file.txt";
     
     public static volatile SetInterface set = null;
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
     
     private static boolean ParseArgs(String [] args) {
-        Getopt g = new Getopt("", args, "a:i:u:d:I:R:M:s:T?h");
+        Getopt g = new Getopt("", args, "a:i:u:d:o:M:s:T?h");
         int c;
         String arg = null;
         while ((c = g.getopt()) != -1)
@@ -43,13 +43,8 @@ class Bench {
                 arg = g.getOptarg();
                 DURATION = Integer.parseInt(arg);
                 break;
-              case 'I':
-                arg = g.getOptarg();
-                INSERT_PERCENT = Integer.parseInt(arg);
-                break;
-              case 'R':
-                arg = g.getOptarg();
-                REMOVE_PERCENT = Integer.parseInt(arg);
+              case 'o':
+                OP_FILE = g.getOptarg();
                 break;
               case 'M':
                 arg = g.getOptarg();
@@ -77,8 +72,6 @@ class Bench {
         System.out.println("  -i      number of iterators");
         System.out.println("  -u      number of updaters");
         System.out.println("  -d      execution time");
-        System.out.println("  -I      percentage of updates that are inserts");
-        System.out.println("  -D      percentage of updates that are deletes");
         System.out.println("  -M      maximum key value");
         System.out.println("  -s      initial size of hash table");
         System.out.println("  -h      print this help text");

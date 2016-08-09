@@ -1,9 +1,11 @@
 import java.util.Random;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
 
 class UpdaterThread extends Thread {
     private int id;
-    private Random oprng;
-    private Random keyrng;
 
     public int inserts;
     public int removals;
@@ -11,29 +13,34 @@ class UpdaterThread extends Thread {
 
     public UpdaterThread(int i) {
         this.id = i;
-        this.oprng = new Random(i);
-        this.keyrng = new Random(i);
         inserts = 0;
         removals = 0;
         contains = 0;
     }
 
     public void run() {
-        int insertThresh = Bench.INSERT_PERCENT;
-        int removeThresh = Bench.INSERT_PERCENT + Bench.REMOVE_PERCENT;
+        BufferedReader br = null;
+        try { br = new BufferedReader(new FileReader(Bench.OP_FILE)); }
+        catch (FileNotFoundException e) { e.printStackTrace(); }
+//        int insertThresh = Bench.INSERT_PERCENT;
+//        int removeThresh = Bench.INSERT_PERCENT + Bench.REMOVE_PERCENT;
         SetInterface set = Bench.set;
 
         while (!Bench.begin);
 
         while (!Bench.stop) {
-            int op = oprng.nextInt(100);
-            int key = keyrng.nextInt(Bench.KEY_RANGE);
+            String line = null;
+            try { line = br.readLine(); }
+            catch (IOException e) { e.printStackTrace(); }
+            String[] tokens = line.split("\t");
+            String op = tokens[0];
+            int key = Integer.parseInt(tokens[1]);
 
-            if (op < insertThresh) {
+            if (op.equals("ins")) {
                 set.insert(key, id);
                 inserts += 1;
             }
-            else if (op < removeThresh) {
+            else if (op.equals("del")) {
                 set.delete(key, id);
                 removals += 1;
             }
