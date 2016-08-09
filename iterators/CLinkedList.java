@@ -29,9 +29,8 @@ public class CLinkedList implements SetInterface{
 		SnapCollector<Node> dummy = new SnapCollector<Node>();
 		dummy.BlockFurtherReports();
 		if (deactivate) {
-			System.out.println("deactivating!");
 		    dummy.Deactivate();
-		} else { System.out.println("no deactivating!"); }
+		}
 		snapPointer = new AtomicReference<SnapCollector<Node>>(dummy);
 
 	}
