@@ -15,13 +15,14 @@ class Bench {
     public static String ALG_NAME = "list";
     public static boolean DEACTIVATE = false;
     public static String OP_FILE = "op_file.txt";
+    public static String INIT_FILE = "init_file.txt";
     
     public static volatile SetInterface set = null;
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
     
     private static boolean ParseArgs(String [] args) {
-        Getopt g = new Getopt("", args, "a:i:u:d:o:M:s:T?h");
+        Getopt g = new Getopt("", args, "a:i:u:d:o:n:M:s:T?h");
         int c;
         String arg = null;
         while ((c = g.getopt()) != -1)
@@ -45,6 +46,9 @@ class Bench {
                 break;
               case 'o':
                 OP_FILE = g.getOptarg();
+                break;
+              case 'n':
+                INIT_FILE = g.getOptarg();
                 break;
               case 'M':
                 arg = g.getOptarg();

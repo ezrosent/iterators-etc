@@ -22,16 +22,25 @@ class UpdaterThread extends Thread {
         BufferedReader br = null;
         try { br = new BufferedReader(new FileReader(Bench.OP_FILE)); }
         catch (FileNotFoundException e) { e.printStackTrace(); }
-//        int insertThresh = Bench.INSERT_PERCENT;
-//        int removeThresh = Bench.INSERT_PERCENT + Bench.REMOVE_PERCENT;
         SetInterface set = Bench.set;
 
         while (!Bench.begin);
 
+        // Offset
+        try { for (int j = 0; j < id; j++) br.readLine(); }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1); }
+
         while (!Bench.stop) {
             String line = null;
-            try { line = br.readLine(); }
-            catch (IOException e) { e.printStackTrace(); }
+            try { 
+                for (int j = 0; j < Bench.UPDATERS_NUM; j++)
+                    line = br.readLine();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1); }
             String[] tokens = line.split("\t");
             String op = tokens[0];
             int key = Integer.parseInt(tokens[1]);

@@ -3,11 +3,11 @@ from random import randrange
 
 INS = int(argv[1])
 DEL = int(argv[2])
+RANGE = int(argv[3])
 
-RANGE = 4096
-N = 1000000
+N = 10000000
 
-OUTPUT = "op_file.txt"
+OUTPUT = "op_file_%d_%d_%d.txt" % (INS, DEL, RANGE)
 file = open(OUTPUT, 'w')
 
 for i in xrange(N):
