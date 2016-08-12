@@ -21,7 +21,7 @@ class UpdaterThread extends Thread {
     public void run() {
         BufferedReader br = null;
         try { br = new BufferedReader(new FileReader(Bench.OP_FILE)); }
-        catch (FileNotFoundException e) { e.printStackTrace(); }
+        catch (FileNotFoundException e) { e.printStackTrace(); System.exit(1); }
         SetInterface set = Bench.set;
 
         while (!Bench.begin);
@@ -40,6 +40,7 @@ class UpdaterThread extends Thread {
             }
             catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("error");
                 System.exit(1); }
             String[] tokens = line.split("\t");
             String op = tokens[0];
@@ -58,5 +59,10 @@ class UpdaterThread extends Thread {
                 contains += 1;
             }
         }
+
+        try { br.close(); }
+        catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1); }
     }
 }

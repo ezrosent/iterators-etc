@@ -1,6 +1,10 @@
 import java.util.Random;
 import java.text.DecimalFormat;
 import gnu.getopt.Getopt;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 class Bench {
     // Note that the total number of threads should be
@@ -81,7 +85,7 @@ class Bench {
         System.out.println("  -h      print this help text");
     }
 
-    private static void InitializeSet() {
+    private static void InitializeSet() throws IOException {
         if (ALG_NAME.equals("ubst"))
             Bench.set = new BinarySearchTree(DEACTIVATE);
         else if (ALG_NAME.equals("hash"))
@@ -89,18 +93,21 @@ class Bench {
         else
             Bench.set = new CLinkedList(DEACTIVATE);
 
-        Random rng = new Random();
-        for (int i = 0; i < INIT_SIZE; i++) {
-            while (true) {
-                int key = rng.nextInt(KEY_RANGE);
-                if (set.insert(key, 0))
-                    break;
-            }
-	    //if (i % 10000 == 0) System.out.println(i + " elements initialized");
+        // Read values from file
+        BufferedReader br = null;
+        try { br = new BufferedReader(new FileReader(Bench.INIT_FILE)); }
+        catch (FileNotFoundException e) { e.printStackTrace(); System.exit(1); }
+
+        String line = null;
+        while ((line = br.readLine()) != null) {
+            int key = Integer.parseInt(line);
+            set.insert(key, 0);
         }
+
+        br.close();
     }
 
-    private static void RunTest(boolean warmup) throws InterruptedException {
+    private static void RunTest(boolean warmup) throws InterruptedException, IOException {
         InitializeSet();
 
         begin = false;
@@ -166,7 +173,7 @@ class Bench {
         System.gc();
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         // Get command line argument
         if (!ParseArgs(args)) return;
 

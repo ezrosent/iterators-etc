@@ -1,5 +1,10 @@
 from subprocess import Popen, PIPE
 import itertools
+import argparse
+
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('-s', action='store_true')
+args = parser.parse_args()
 
 def to_str(data):
 	if type(data) != type(()):
@@ -65,12 +70,13 @@ total = runs * len([j for j in itertools.product(*PARAMETER_COMBINATIONS)])
 
 
 # initialize files for reading
-for r, s in RANGE_SIZE:
-	pInit = Popen(["python", "generate_init.py", str(r), str(s)])
-	pInit.communicate()
-	for i, d, c in PERCENTAGES:
-		pOps = Popen(["python", "generate_ops.py", str(i), str(d), str(r)])
-		pOps.communicate()
+if not args.s:
+		for r, s in RANGE_SIZE:
+			pInit = Popen(["python", "generate_init.py", str(r), str(s)])
+			pInit.communicate()
+			for i, d, c in PERCENTAGES:
+				pOps = Popen(["python", "generate_ops.py", str(i), str(d), str(r)])
+				pOps.communicate()
 
 # main loop
 for param in itertools.product(*PARAMETER_COMBINATIONS):
