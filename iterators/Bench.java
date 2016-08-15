@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
 class Bench {
     // Note that the total number of threads should be
@@ -22,9 +24,12 @@ class Bench {
     public static String INIT_FILE = "init_file.txt";
     
     public static volatile SetInterface set = null;
+    public static volatile List<List<String>> ops = null;
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
-    
+
+    SnapCollector<Integer> test = new SnapCollector<Integer>();
+
     private static boolean ParseArgs(String [] args) {
         Getopt g = new Getopt("", args, "a:i:u:d:o:n:M:s:T?h");
         int c;
@@ -85,7 +90,7 @@ class Bench {
         System.out.println("  -h      print this help text");
     }
 
-    private static void InitializeSet() throws IOException {
+    private static void InitializeSet() throws IOException, FileNotFoundException {
         if (ALG_NAME.equals("ubst"))
             Bench.set = new BinarySearchTree(DEACTIVATE);
         else if (ALG_NAME.equals("hash"))
@@ -94,9 +99,7 @@ class Bench {
             Bench.set = new CLinkedList(DEACTIVATE);
 
         // Read values from file
-        BufferedReader br = null;
-        try { br = new BufferedReader(new FileReader(Bench.INIT_FILE)); }
-        catch (FileNotFoundException e) { e.printStackTrace(); System.exit(1); }
+        BufferedReader br = new BufferedReader(new FileReader(Bench.INIT_FILE));
 
         String line = null;
         while ((line = br.readLine()) != null) {
@@ -107,8 +110,26 @@ class Bench {
         br.close();
     }
 
+    // Move file of operations into a list, for fast access
+    // Divide them among the updater threads
+    private static void InitializeOps() throws IOException, FileNotFoundException {
+        BufferedReader br = new BufferedReader(new FileReader(Bench.OP_FILE));
+        ops = new ArrayList<List<String>>();
+        for (int id = 0; id < UPDATERS_NUM; id++) ops.add(new ArrayList<String>());
+
+        int id = 0;
+        String line = null;
+        while ((line = br.readLine()) != null) {
+            ops.get(id).add(line);
+            id = (id + 1) % UPDATERS_NUM;
+        }
+
+        br.close();
+    }
+
     private static void RunTest(boolean warmup) throws InterruptedException, IOException {
         InitializeSet();
+        InitializeOps();
 
         begin = false;
         stop = false;

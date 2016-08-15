@@ -43,9 +43,9 @@ configfile.close()
 # Open file, write header
 header_end = reduce(lambda x, y: x + y, map(lambda s: '\t' + s.upper(), ALGS)) + '\n'
 outputfile = open("output.txt", 'w')
-outputfile.write("UP\tTIME\tCFG\tSIZE\tINIT" + header_end)
+outputfile.write("UPDT\tTIME\tCFG\tSIZE\tINIT" + header_end)
 verbose = open("output_verbose.txt", 'w')
-verbose.write("UP\tTIME\tCFG\tSIZE\tRUN" + header_end)
+verbose.write("UPDT\tTIME\tCFG\tSIZE\tRUN" + header_end)
 
 PARAMETER_COMBINATIONS = [UPDATERS_NUM, DURATION, PERCENTAGES, RANGE_SIZE]
 

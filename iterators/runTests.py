@@ -2,12 +2,11 @@ from subprocess import Popen, PIPE
 import itertools
 
 ALGS = ["hash", "ubst", "list"]
-ITERATORS_NUM = [1, 2] # Compare against 0
-UPDATERS_NUM = [1, 2, 3, 4]  #[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
+ITERATORS_NUM = [1] # Compare against 0
+UPDATERS_NUM = [1, 2, 3, 4]
 DURATION = [2, 4]
 PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
-KEY_RANGE = [4000]
-INIT_SIZE = [1000]
+RANGE_SIZE = [(4096, 1024)]
 runs = 1
 
 # Maybe sanitize inputs here
@@ -30,13 +29,13 @@ configfile.close()
 # Open file, write header
 header_end = reduce(lambda x, y: x + y, map(lambda s: '\t' + s.upper(), ALGS)) + '\n'
 outputfile = open("output.txt", 'w')
-outputfile.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT" + header_end)
+outputfile.write("ITER\tUPDT\tTIME\tCFIG\tSIZE" + header_end)
 verbose = open("output_verbose.txt", 'w')
-verbose.write("IT\tUP\tTIME\tCFG\tKEYR\tINIT\tRUN" + header_end)
+verbose.write("ITER\tUPDT\tTIME\tCFIG\tSIZE\tRUN" + header_end)
 
 PARAMETER_COMBINATIONS = [ITERATORS_NUM, UPDATERS_NUM, DURATION, PERCENTAGES, KEY_RANGE, INIT_SIZE]
 
-# Iterate through all combinations
+# Make argument list for Popen to start a Java execution
 def makeargs(param, alg, i):
 	args = ["java", "-cp", (".:lib/java-getopt-1.0.13.jar"), "Bench"]
 	args += ["-a", alg]
@@ -53,6 +52,8 @@ def makeargs(param, alg, i):
 count = 0
 total = runs * len([j for j in itertools.product(*PARAMETER_COMBINATIONS)])
 
+# function that eliminates whitespace when printing tuples
+# to make things easier when plotting things in gnuplot
 def to_str(data):
 	if type(data) != type(()):
 		return str(data)
