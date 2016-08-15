@@ -20,7 +20,6 @@ class Bench {
     public static boolean DEACTIVATE = false;
     public static String OP_FILE = "op_file.txt";
     public static String INIT_FILE = "init_file.txt";
-    
     public static volatile SetInterface set = null;
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
