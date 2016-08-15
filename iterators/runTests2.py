@@ -19,7 +19,7 @@ UPDATERS_NUM = [1, 2, 3, 4]
 DURATION = [2, 4]
 PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
 RANGE_SIZE = [(4096, 1024)]
-runs = 1
+runs = 10
 
 # files
 op_prefix = "op_file"
