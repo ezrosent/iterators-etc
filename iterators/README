@@ -1,1 +1,5 @@
-java -cp .:./lib/java-getopt-1.0.13.jar SetBench
+This branch has been created for testing.
+
+Run the makefile before running anything else. Bench.java runs code for one test; specify input parameters via command line arguments.
+runTests.py runs several tests and writes all results to an output file. run.sh does everyything: it compiles the Java code,
+runs runTests.py, then runs a gnuplot script to plot the gathered data.
