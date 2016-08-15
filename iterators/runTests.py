@@ -1,5 +1,20 @@
 from subprocess import Popen, PIPE
 import itertools
+import argparse
+
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('-s', action='store_true')
+args = parser.parse_args()
+
+# function that eliminates whitespace when printing tuples
+# to make things easier when plotting things in gnuplot
+def to_str(data):
+	if type(data) != type(()):
+		return str(data)
+	else:
+		return_str = "("
+		return_str += (','.join(map(str, data))).strip(',') + ')'
+		return return_str
 
 ALGS = ["hash", "ubst", "list"]
 ITERATORS_NUM = [1] # Compare against 0
@@ -9,7 +24,8 @@ PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
 RANGE_SIZE = [(4096, 1024)]
 runs = 1
 
-# Maybe sanitize inputs here
+op_prefix = "op_file"
+init_prefix = "init_file"
 
 # Write configurations used to a file
 configfile = open("config.txt", 'w')
@@ -22,8 +38,7 @@ for perc in PERCENTAGES:
 	perc_string += "(%d,%d,%d) " % (perc[0], perc[1], perc[2])
 perc_string = perc_string.strip() + '\n'
 configfile.write(perc_string)
-configfile.write(' '.join(map(str, KEY_RANGE)) + '\n')
-configfile.write(' '.join(map(str, INIT_SIZE)) + '\n')
+configfile.write(' '.join(map(str, RANGE_SIZE)) + '\n')
 configfile.close()
 
 # Open file, write header
@@ -33,7 +48,7 @@ outputfile.write("ITER\tUPDT\tTIME\tCFIG\tSIZE" + header_end)
 verbose = open("output_verbose.txt", 'w')
 verbose.write("ITER\tUPDT\tTIME\tCFIG\tSIZE\tRUN" + header_end)
 
-PARAMETER_COMBINATIONS = [ITERATORS_NUM, UPDATERS_NUM, DURATION, PERCENTAGES, KEY_RANGE, INIT_SIZE]
+PARAMETER_COMBINATIONS = [ITERATORS_NUM, UPDATERS_NUM, DURATION, PERCENTAGES, RANGE_SIZE]
 
 # Make argument list for Popen to start a Java execution
 def makeargs(param, alg, i):
@@ -42,25 +57,24 @@ def makeargs(param, alg, i):
 	args += ["-i", str(i)]
 	args += ["-u", str(param[1])]
 	args += ["-d", str(param[2])]
-	args += ["-I", str(param[3][0])]
-	args += ["-R", str(param[3][1])]
-	args += ["-M", str(param[4])]
-	args += ["-s", str(param[5])]
+	args += ["-o", op_prefix + "_%d_%d_%d.txt" % (param[3][0], param[3][1], param[4][0])]
+	args += ["-n", init_prefix + "_%d_%d.txt" % (param[4][0], param[4][1])]
+	args += ["-M", str(param[4][0])]
+	args += ["-s", str(param[4][1])]
 	return args
 
 # for keeping track of progress
 count = 0
 total = runs * len([j for j in itertools.product(*PARAMETER_COMBINATIONS)])
 
-# function that eliminates whitespace when printing tuples
-# to make things easier when plotting things in gnuplot
-def to_str(data):
-	if type(data) != type(()):
-		return str(data)
-	else:
-		return_str = "("
-		return_str += (','.join(map(str, data))).strip(',') + ')'
-		return return_str
+# initialize files for reading
+if not args.s:
+        for r, s in RANGE_SIZE:
+                pInit = Popen(["python", "generate_init.py", str(r), str(s)])
+                pInit.communicate()
+                for i, d, c in PERCENTAGES:
+                        pOps = Popen(["python", "generate_ops.py", str(i), str(d), str(r)])
+                        pOps.communicate()
 
 # main loop
 for param in itertools.product(*PARAMETER_COMBINATIONS):

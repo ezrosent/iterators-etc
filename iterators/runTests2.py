@@ -15,7 +15,7 @@ def to_str(data):
 		return return_str
 
 ALGS = ["hash", "ubst", "list"]
-UPDATERS_NUM = [1, 2, 3, 4]  #[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31] #[1, 2, 3, 4, 5, 6, 7]
+UPDATERS_NUM = [1, 2, 3, 4]
 DURATION = [2, 4]
 PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
 RANGE_SIZE = [(4096, 1024)]
@@ -43,9 +43,9 @@ configfile.close()
 # Open file, write header
 header_end = reduce(lambda x, y: x + y, map(lambda s: '\t' + s.upper(), ALGS)) + '\n'
 outputfile = open("output.txt", 'w')
-outputfile.write("UPDT\tTIME\tCFG\tSIZE\tINIT" + header_end)
+outputfile.write("UPDT\tTIME\tCFIG\tSIZE" + header_end)
 verbose = open("output_verbose.txt", 'w')
-verbose.write("UPDT\tTIME\tCFG\tSIZE\tRUN" + header_end)
+verbose.write("UPDT\tTIME\tCFIG\tSIZE\tRUN" + header_end)
 
 PARAMETER_COMBINATIONS = [UPDATERS_NUM, DURATION, PERCENTAGES, RANGE_SIZE]
 
@@ -71,12 +71,12 @@ total = runs * len([j for j in itertools.product(*PARAMETER_COMBINATIONS)])
 
 # initialize files for reading
 if not args.s:
-		for r, s in RANGE_SIZE:
-			pInit = Popen(["python", "generate_init.py", str(r), str(s)])
-			pInit.communicate()
-			for i, d, c in PERCENTAGES:
-				pOps = Popen(["python", "generate_ops.py", str(i), str(d), str(r)])
-				pOps.communicate()
+	for r, s in RANGE_SIZE:
+		pInit = Popen(["python", "generate_init.py", str(r), str(s)])
+		pInit.communicate()
+		for i, d, c in PERCENTAGES:
+			pOps = Popen(["python", "generate_ops.py", str(i), str(d), str(r)])
+			pOps.communicate()
 
 # main loop
 for param in itertools.product(*PARAMETER_COMBINATIONS):
