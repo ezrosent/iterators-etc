@@ -5,7 +5,7 @@ INS = int(argv[1])
 DEL = int(argv[2])
 RANGE = int(argv[3])
 
-N = 40000000
+N = 100000
 
 OUTPUT = "op_file_%d_%d_%d.txt" % (INS, DEL, RANGE)
 file = open(OUTPUT, 'w')
