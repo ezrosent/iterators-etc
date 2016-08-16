@@ -19,7 +19,7 @@ class Bench {
     public static int KEY_RANGE = 4096;
     public static int INIT_SIZE = 1024;
     public static String ALG_NAME = "list";
-    public static boolean DEACTIVATE = false;
+    public static boolean DEACTIVATE = true;
     public static String OP_FILE = "op_file.txt";
     public static String INIT_FILE = "init_file.txt";
     public static volatile SetInterface set = null;
@@ -67,7 +67,7 @@ class Bench {
                 INIT_SIZE = Integer.parseInt(arg);
                 break;
 	      case 'T':
-		DEACTIVATE = true;
+		DEACTIVATE = false;
                 break;
               case 'h':
                 printHelp();

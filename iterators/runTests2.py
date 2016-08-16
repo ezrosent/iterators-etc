@@ -50,6 +50,7 @@ verbose.write("UPDT\tTIME\tCFIG\tSIZE\tRUN" + header_end)
 PARAMETER_COMBINATIONS = [UPDATERS_NUM, DURATION, PERCENTAGES, RANGE_SIZE]
 
 # Iterate through all combinations
+# Giving -T flag turns on reports
 def makeargs(param, alg, deact):
 	args = ["java", "-cp", (".:lib/java-getopt-1.0.13.jar"), "Bench"]
 	args += ["-a", alg]
@@ -60,7 +61,7 @@ def makeargs(param, alg, deact):
 	args += ["-n", init_prefix + "_%d_%d.txt" % (param[3][0], param[3][1])]
 	args += ["-M", str(param[3][0])]
 	args += ["-s", str(param[3][1])]
-	if deact:
+	if not deact:
 		args += ["-T"]
 	return args
 
