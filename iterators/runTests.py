@@ -19,10 +19,10 @@ def to_str(data):
 ALGS = ["hash", "ubst", "list"]
 ITERATORS_NUM = [1] # Compare against 0
 UPDATERS_NUM = [1, 2, 3, 4]
-DURATION = [2, 4]
+DURATION = [2, 4, 10]
 PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
 RANGE_SIZE = [(4096, 1024)]
-runs = 1
+runs = 10
 
 op_prefix = "op_file"
 init_prefix = "init_file"

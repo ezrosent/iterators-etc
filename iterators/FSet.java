@@ -62,11 +62,13 @@ class FSet
                 return -(n.length + 1);
             else if (casHead(h, n)) {
             	// TODO: if CAS successful "report" the "node"
-            	if (insert) {
-            	    sc.Report(tid, ret.node, ReportType.add, ret.node.key);
-            	} else {
+		if (sc.IsActive()) {
+            	    if (insert) {
+            	        sc.Report(tid, ret.node, ReportType.add, ret.node.key);
+            	    } else {
             		sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
-            	}
+            	    }
+		}    
                 return n.length + 1;
             }
             h = head;
