@@ -9,6 +9,8 @@
 
 make -f Makefile
 
+mkdir -p Output
+
 # create a folder with the current time in the Output directory
 currentDate=`date +"%Y-%m-%d-%H-%M"`
 mkdir Output/$currentDate
