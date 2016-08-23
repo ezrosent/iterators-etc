@@ -84,6 +84,8 @@ class Bench {
         System.out.println("  -i      number of iterators");
         System.out.println("  -u      number of updaters");
         System.out.println("  -d      execution time");
+        System.out.println("  -o      operations file");
+        System.out.println("  -n      initialization file");
         System.out.println("  -M      maximum key value");
         System.out.println("  -s      initial size of hash table");
         System.out.println("  -h      print this help text");
