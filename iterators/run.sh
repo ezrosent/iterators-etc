@@ -17,7 +17,7 @@ mkdir Output/$currentDate
 chmod 777 Output/$currentDate
 
 # run the tests
-python runTests2.py
+python runTests.py
 #create the plots
 gnuplot -e "outputDir='Output/$currentDate'" plot.gp.sh
 
