@@ -16,7 +16,7 @@ def to_str(data):
 		return_str += (','.join(map(str, data))).strip(',') + ')'
 		return return_str
 
-ALGS = ["hash", "ubst", "list"]
+ALGS = ["hash", "ubst"] # can't add list unless we have code for list with no support for iterators
 ITERATORS_NUM = [1] # Compare against 0
 UPDATERS_NUM = [1, 2, 3, 4]
 DURATION = [2, 4] #, 10]
@@ -51,8 +51,8 @@ verbose.write("ITER\tUPDT\tTIME\tCFIG\tSIZE\tRUN" + header_end)
 PARAMETER_COMBINATIONS = [ITERATORS_NUM, UPDATERS_NUM, DURATION, PERCENTAGES, RANGE_SIZE]
 
 # Make argument list for Popen to start a Java execution
-def makeargs(param, alg, i):
-	args = ["java", "-cp", (".:lib/java-getopt-1.0.13.jar"), "Bench"]
+def makeargs(param, alg, i, path):
+	args = ["java", "-cp", (".:lib/java-getopt-1.0.13.jar:" + path), "Bench"]
 	args += ["-a", alg]
 	args += ["-i", str(i)]
 	args += ["-u", str(param[1])]
@@ -82,10 +82,10 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 	for r in xrange(runs):
 		result_str = ""
 		for alg in ALGS:
-			pTest0 = Popen(makeargs(param, alg, 0), stdout=PIPE)
-			result0 = int(pTest0.communicate()[0].strip())
-			pTest1 = Popen(makeargs(param, alg, param[0]), stdout=PIPE)
-			result1 = int(pTest1.communicate()[0].strip())
+			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE)
+			result0 = int(pTest0.communicate()[0].strip()) # without iterators
+			pTest1 = Popen(makeargs(param, alg, param[0], "iter"), stdout=PIPE)
+			result1 = int(pTest1.communicate()[0].strip()) # with iterators
 			accum[alg] += float(result1) / result0
 			result_str += '\t' + str(float(result1) / result0)
 

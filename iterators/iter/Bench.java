@@ -27,7 +27,7 @@ class Bench {
     public static volatile boolean begin = false;
     public static volatile boolean stop = false;
 
-    SnapCollector<Integer> test = new SnapCollector<Integer>();
+    //SnapCollector<Integer> test = new SnapCollector<Integer>();
 
     private static boolean ParseArgs(String [] args) {
         Getopt g = new Getopt("", args, "a:i:u:d:o:n:M:s:T?h");
@@ -96,8 +96,8 @@ class Bench {
             Bench.set = new BinarySearchTree(DEACTIVATE);
         else if (ALG_NAME.equals("hash"))
             Bench.set = new CHashSet(DEACTIVATE);
-        else
-            Bench.set = new CLinkedList(DEACTIVATE);
+        //else
+        //    Bench.set = new CLinkedList(DEACTIVATE);
 
         // Read values from file
         BufferedReader br = new BufferedReader(new FileReader(Bench.INIT_FILE));
