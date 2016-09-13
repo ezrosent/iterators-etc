@@ -24,6 +24,7 @@ CLASSES_ITER = $(ITER_PATH)/ReportItem.java \
 	  $(ITER_PATH)/HashNode.java \
 	  $(ITER_PATH)/FSet.java \
 	  $(ITER_PATH)/CHashSet.java \
+	  $(ITER_PATH)/CLinkedList.java \
 	  $(ITER_PATH)/UpdaterThread.java \
 	  $(ITER_PATH)/IteratorThread.java
 
@@ -34,6 +35,7 @@ CLASSES_ORIG = $(ORIG_PATH)/SetInterface.java \
 	  $(ORIG_PATH)/HashNode.java \
 	  $(ORIG_PATH)/FSet.java \
 	  $(ORIG_PATH)/CHashSet.java \
+	  $(ORIG_PATH)/CLinkedList.java \
 	  $(ORIG_PATH)/UpdaterThread.java \
 	  $(ORIG_PATH)/IteratorThread.java
 

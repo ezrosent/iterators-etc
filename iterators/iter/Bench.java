@@ -96,8 +96,8 @@ class Bench {
             Bench.set = new BinarySearchTree(DEACTIVATE);
         else if (ALG_NAME.equals("hash"))
             Bench.set = new CHashSet(DEACTIVATE);
-        //else
-        //    Bench.set = new CLinkedList(DEACTIVATE);
+        else
+            Bench.set = new CLinkedList(DEACTIVATE);
 
         // Read values from file
         BufferedReader br = new BufferedReader(new FileReader(Bench.INIT_FILE));

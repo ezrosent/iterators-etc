@@ -16,7 +16,7 @@ def to_str(data):
 		return_str += (','.join(map(str, data))).strip(',') + ')'
 		return return_str
 
-ALGS = ["hash", "ubst"] # can't add list unless we have code for list with no support for iterators
+ALGS = ["hash", "ubst", "list"] 
 ITERATORS_NUM = [1] # Compare against 0
 UPDATERS_NUM = [1, 2, 3, 4]
 DURATION = [2, 4] #, 10]
