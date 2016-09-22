@@ -26,7 +26,8 @@ CLASSES_ITER = $(ITER_PATH)/ReportItem.java \
 	  $(ITER_PATH)/CHashSet.java \
 	  $(ITER_PATH)/CLinkedList.java \
 	  $(ITER_PATH)/UpdaterThread.java \
-	  $(ITER_PATH)/IteratorThread.java
+	  $(ITER_PATH)/IteratorThread.java \
+	  $(ITER_PATH)/Bench.java 
 
 CLASSES_ORIG = $(ORIG_PATH)/SetInterface.java \
 	  $(ORIG_PATH)/TreeNode.java \
@@ -37,7 +38,8 @@ CLASSES_ORIG = $(ORIG_PATH)/SetInterface.java \
 	  $(ORIG_PATH)/CHashSet.java \
 	  $(ORIG_PATH)/CLinkedList.java \
 	  $(ORIG_PATH)/UpdaterThread.java \
-	  $(ORIG_PATH)/IteratorThread.java
+	  $(ORIG_PATH)/IteratorThread.java \
+	  $(ORIG_PATH)/Bench.java
 
 # do not change the order or else set $CURR_PATH accordingly
 default: classes_orig classes_iter

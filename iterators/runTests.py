@@ -16,7 +16,7 @@ def to_str(data):
 		return_str += (','.join(map(str, data))).strip(',') + ')'
 		return return_str
 
-ALGS = ["hash", "ubst", "list"] 
+ALGS = ["list"]#"hash", "ubst", "list"] 
 ITERATORS_NUM = [1] # Compare against 0
 UPDATERS_NUM = [1, 2, 3, 4]
 DURATION = [2, 4] #, 10]
@@ -82,7 +82,7 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 	for r in xrange(runs):
 		result_str = ""
 		for alg in ALGS:
-			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE)
+			pTest0 = Popen(makeargs(param, alg, param[0], "orig"), stdout=PIPE)
 			result0 = int(pTest0.communicate()[0].strip()) # without iterators
 			pTest1 = Popen(makeargs(param, alg, param[0], "iter"), stdout=PIPE)
 			result1 = int(pTest1.communicate()[0].strip()) # with iterators

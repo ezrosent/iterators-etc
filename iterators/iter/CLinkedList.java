@@ -209,6 +209,27 @@ public class CLinkedList implements SetInterface{
 	}
 	
 	// iterator: calculates the nodes in the list via iteration
+	/*
+	public List<Integer> iterate(int tid, boolean actual_iterate) {
+	    if (actual_iterate) {
+	        return actual_iterate(tid);
+	    } else {
+		return iterate_for_cache(tid);  
+	    }
+	}
+	
+	public List<Integer> iterate_for_cache(int tid) {
+	    List<Integer> list = new ArrayList<Integer>();
+	    // simply go through the list
+	    
+	    Node curr = head.next.getReference();
+	    while (curr != null) {
+	        list.add(curr.key);
+		curr = curr.next.getReference();
+	    }
+	    return list;
+	}
+*/
 	public List<Integer> iterate(int tid) {
 	    List<Integer> list = new ArrayList<Integer>();
 	    
