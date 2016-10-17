@@ -61,6 +61,7 @@ def makeargs(param, alg, i, path):
 	args += ["-n", init_prefix + "_%d_%d.txt" % (param[4][0], param[4][1])]
 	args += ["-M", str(param[4][0])]
 	args += ["-s", str(param[4][1])]
+	print args
 	return args
 
 # for keeping track of progress
