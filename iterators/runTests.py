@@ -17,12 +17,12 @@ def to_str(data):
 		return return_str
 
 ALGS = ["hash", "ubst"]#, "list"] 
-ITERATORS_NUM = [1,2] # Compare against 0
-UPDATERS_NUM = [3, 5]#, 7, 9, 11, 13, 15]
-DURATION = [2, 4] #, 10]
-PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
-RANGE_SIZE = [(4096, 2048), (65536,32768)]#, (1048576,524288)]
-runs = 1
+ITERATORS_NUM = [1]#,2] # Compare against 0
+UPDATERS_NUM = [1, 3, 5, 7, 9, 11, 13, 15]
+DURATION = [2]#, 4] #, 10]
+PERCENTAGES = [(25, 25, 50)]#, (50, 50, 0)]
+RANGE_SIZE = [(4096, 2048), (65536,32768), (1048576,524288)]
+runs = 10
 
 op_prefix = "op_file"
 init_prefix = "init_file"
@@ -88,9 +88,9 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 		result_str = ""
 		for alg in ALGS:
 			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE)
-			result0 = 1 #int(pTest0.communicate()[0].strip()) # without iterators
+			result0 = int(pTest0.communicate()[0].strip()) # without iterators
 			pTest1 = Popen(makeargs(param, alg, param[0], "iter"), stdout=PIPE)
-			result1 = 2 #int(pTest1.communicate()[0].strip()) # with iterators
+			result1 = int(pTest1.communicate()[0].strip()) # with iterators
 			accum[alg] += float(result1) / result0
 			result_str += '\t' + str(float(result1) / result0)
 
