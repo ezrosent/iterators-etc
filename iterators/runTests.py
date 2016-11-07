@@ -16,13 +16,13 @@ def to_str(data):
 		return_str += (','.join(map(str, data))).strip(',') + ')'
 		return return_str
 
-ALGS = ["hash", "ubst", "list"] 
-ITERATORS_NUM = [1] # Compare against 0
-UPDATERS_NUM = [1, 2, 3, 4]
+ALGS = ["hash", "ubst"]#, "list"] 
+ITERATORS_NUM = [1,2] # Compare against 0
+UPDATERS_NUM = [3, 5]#, 7, 9, 11, 13, 15]
 DURATION = [2, 4] #, 10]
 PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
-RANGE_SIZE = [(4096, 1024)]
-runs = 10
+RANGE_SIZE = [(4096, 2048), (65536,32768)]#, (1048576,524288)]
+runs = 1
 
 op_prefix = "op_file"
 init_prefix = "init_file"
@@ -38,7 +38,12 @@ for perc in PERCENTAGES:
 	perc_string += "(%d,%d,%d) " % (perc[0], perc[1], perc[2])
 perc_string = perc_string.strip() + '\n'
 configfile.write(perc_string)
-configfile.write(' '.join(map(str, RANGE_SIZE)) + '\n')
+range_string = ""
+for range in RANGE_SIZE:
+	range_string += "(%d,%d) " % (range[0], range[1])
+range_string = range_string.strip() + '\n'
+configfile.write(range_string)
+#configfile.write(' '.join(map(str, RANGE_SIZE)) + '\n')
 configfile.close()
 
 # Open file, write header
@@ -83,9 +88,9 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 		result_str = ""
 		for alg in ALGS:
 			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE)
-			result0 = int(pTest0.communicate()[0].strip()) # without iterators
+			result0 = 1 #int(pTest0.communicate()[0].strip()) # without iterators
 			pTest1 = Popen(makeargs(param, alg, param[0], "iter"), stdout=PIPE)
-			result1 = int(pTest1.communicate()[0].strip()) # with iterators
+			result1 = 2 #int(pTest1.communicate()[0].strip()) # with iterators
 			accum[alg] += float(result1) / result0
 			result_str += '\t' + str(float(result1) / result0)
 

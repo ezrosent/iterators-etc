@@ -4,35 +4,36 @@ reset
 # set term dumb
 
 # number of lines in one plot : ie, number of data structures
-nLines = 3 # should be 3 when including LL
+nLines = 2 # should be 3 when including LL
 nIterators = "`head -1 config.txt`"
 nUpdaters = "`head -2 config.txt | tail -1`"
 nDuration = "`head -3 config.txt | tail -1`"
 nWeightConfig = "`head -4 config.txt | tail -1`"
+nRange = "`head -5 config.txt | tail -1`"
 
-#print nIterators
-#print nUpdaters
-#print nDuration
-#print nWeightConfig
+flineI = 1
+flineR = flineI
+incI = words(nUpdaters) * words(nDuration) * words(nWeightConfig) * words(nRange)
+incU = words(nDuration) * words(nWeightConfig) * words(nRange)
+incD = words(nWeightConfig) * words(nRange)
+incC = words(nRange)
+incR = 1
+fline = flineI
+lline = flineI + incI - 1
 
-firstLine = 1
-lastLine = firstLine + (words(nUpdaters) * words(nDuration) * words(nWeightConfig)) - 1
-increment = words(nDuration) * words(nWeightConfig)
+print "incI = " . incI . " incU = " . incU . " incD = " . incD . " incC = " . incC . " incR = " . incR
+
 
 # the starting column of time parameter. Before this column are the benchmark parameters.
 startCol = "`wc -l < config.txt`" + 1
-#print startCol
 nPlotsY = words(nDuration)
-#print nPlotsY
 nPlotsX = words(nWeightConfig)
-#print nPlotsX
-nMultiplots = words(nIterators)
-#print nMultiplots
 
-do for [l=1:nMultiplots] {
+do for [l=1:words(nIterators)] {
+  do for [m=1:words(nRange)] {
 
     #colors = "red green blue violet pink"
-    titles = "hash-set unbalanced-BST"
+    titles = "HS UBST"
     #markers = "1 2 3 5 6"  # ["cross", "3 lines cross", "filled square"]
     #linetype = "1 2 3 4" # ["solid", "dashed", "smaller dashes", "smaller dashes"]
     columns(x) = x + (startCol - 1)
@@ -45,7 +46,7 @@ do for [l=1:nMultiplots] {
     sizeY = deltaY
 
     #set the name of the output file
-    set output outputDir."/iterators_" . word(nIterators, l) . ".png" 
+    set output outputDir."/iterators_" . word(nIterators, l) . "range_" . word(nRange, m) . ".png" 
     set term png size 1200,1200
 
     # size x, y tells the percentage of width and height of the plot window.
@@ -74,14 +75,12 @@ do for [l=1:nMultiplots] {
 	    set title "config = " . word(nWeightConfig,j) . ", duration = " . word(nDuration,k) . "sec" font ", 14"
 	    set origin originX,originY
             originX = originX + deltaX;
-	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every increment::firstLine::lastLine title word(titles,i) with linespoints linewidth 2 pointsize 1
-	    firstLine = firstLine + 1
+	    print "fline = ". fline . " lline = ".lline
+	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline::lline title word(titles,i) with linespoints linewidth 2 pointsize 1
+	    fline = fline + incC
        }
+       fline = flineR + incD
     }
-
-    firstLine = lastLine + 1
-    lastLine = firstLine + (words(nUpdaters) * words(nDuration) * words(nWeightConfig)) - 1
-
 
     #############################################
 
@@ -97,7 +96,7 @@ do for [l=1:nMultiplots] {
     set size 4,4
 
     set key box 
-    set key horizontal samplen 1 width 0 height 0.5 maxrows 1 maxcols 12 
+    set key horizontal samplen 1 width 5 height 0.5 maxrows 1 maxcols 12
     set key at screen 0.5,screen 0.99 center top
     set key font ", 16"
 
@@ -110,4 +109,12 @@ do for [l=1:nMultiplots] {
 
     # set everything back for the next plot
     reset
-}
+    flineR = flineR + incR
+    fline = flineR
+  } # closing for nRange
+
+  flineI = flineI + incI
+  fline = flineI
+  lline = flineI + incI - 1
+  flineR = flineI
+} # closing for nIterators
