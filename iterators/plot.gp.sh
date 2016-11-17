@@ -12,7 +12,7 @@ nWeightConfig = "`head -4 config.txt | tail -1`"
 nRange = "`head -5 config.txt | tail -1`"
 
 flineI = 1
-flineR = flineI
+flineD = flineI
 incI = words(nUpdaters) * words(nDuration) * words(nWeightConfig) * words(nRange)
 incU = words(nDuration) * words(nWeightConfig) * words(nRange)
 incD = words(nWeightConfig) * words(nRange)
@@ -26,11 +26,11 @@ print "incI = " . incI . " incU = " . incU . " incD = " . incD . " incC = " . in
 
 # the starting column of time parameter. Before this column are the benchmark parameters.
 startCol = "`wc -l < config.txt`" + 1
-nPlotsY = words(nDuration)
+nPlotsY = words(nRange)
 nPlotsX = words(nWeightConfig)
 
 do for [l=1:words(nIterators)] {
-  do for [m=1:words(nRange)] {
+  do for [m=1:words(nDuration)] {
 
     #colors = "red green blue violet pink"
     titles = "HS UBST"
@@ -46,7 +46,7 @@ do for [l=1:words(nIterators)] {
     sizeY = deltaY
 
     #set the name of the output file
-    set output outputDir."/iterators_" . word(nIterators, l) . "range_" . word(nRange, m) . ".png" 
+    set output outputDir."/iterators_" . word(nIterators, l) . "dur_" . word(nDuration, m) . ".png" 
     set term png size 1200,1200
 
     # size x, y tells the percentage of width and height of the plot window.
@@ -72,14 +72,15 @@ do for [l=1:words(nIterators)] {
         originX = 0;
         originY = originY - deltaY;
         do for [j=1:nPlotsX] { # 3 cols
-	    set title "config = " . word(nWeightConfig,j) . ", duration = " . word(nDuration,k) . "sec" font ", 14"
+	    set title "config = " . word(nWeightConfig,j) . ", range = " . word(nRange,k) font ", 14"
 	    set origin originX,originY
             originX = originX + deltaX;
 	    print "fline = ". fline . " lline = ".lline
 	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline::lline title word(titles,i) with linespoints linewidth 2 pointsize 1
 	    fline = fline + incC
        }
-       fline = flineR + incD
+       flineD = flineD + incR
+       fline = flineD
     }
 
     #############################################
@@ -109,12 +110,10 @@ do for [l=1:words(nIterators)] {
 
     # set everything back for the next plot
     reset
-    flineR = flineR + incR
-    fline = flineR
   } # closing for nRange
 
   flineI = flineI + incI
   fline = flineI
   lline = flineI + incI - 1
-  flineR = flineI
+  flineD = flineI
 } # closing for nIterators
