@@ -19,6 +19,7 @@ chmod 777 Output/$currentDate
 # run the tests
 python runTests.py
 #create the plots
+gnuplot -e "outputDir='Output/$currentDate'" plot_mul_iter.gp.sh
 gnuplot -e "outputDir='Output/$currentDate'" plot.gp.sh
 
 # move the output to the correct directory in Output
