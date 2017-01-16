@@ -190,7 +190,7 @@ class Bench {
 
         long totalOps = inserts + removals + contains;
         if (!warmup)
-            System.out.println(totalOps);
+            System.out.println(totalOps + "+" + iterations);
 
         System.gc();
     }

@@ -17,11 +17,11 @@ def to_str(data):
 		return return_str
 
 ALGS = ["hash", "ubst"]#, "list"] 
-ITERATORS_NUM = [1]#,2] # Compare against 0
+ITERATORS_NUM = [1, 2] # Compare against 0
 UPDATERS_NUM = [1, 3, 5, 7, 9, 11, 13, 15]
 DURATION = [2]#, 4] #, 10]
-PERCENTAGES = [(25, 25, 50)]#, (50, 50, 0)]
-RANGE_SIZE = [(4096, 2048), (65536,32768), (1048576,524288)]
+PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
+RANGE_SIZE = [(4096, 2048), (16384, 8192), (65536, 32768)]
 runs = 10
 
 op_prefix = "op_file"
@@ -84,15 +84,19 @@ if not args.s:
 # main loop
 for param in itertools.product(*PARAMETER_COMBINATIONS):
 	accum = {a:0 for a in ALGS}
+	accum_iter = {a:0 for a in ALGS}
 	for r in xrange(runs):
 		result_str = ""
 		for alg in ALGS:
 			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE)
-			result0 = int(pTest0.communicate()[0].strip()) # without iterators
+			result0 = int(pTest0.communicate()[0].strip().split("+")[0]) # without iterators
 			pTest1 = Popen(makeargs(param, alg, param[0], "iter"), stdout=PIPE)
-			result1 = int(pTest1.communicate()[0].strip()) # with iterators
+			temp = pTest1.communicate()[0].strip().split("+")
+			result1 = int(temp[0]) # with iterators
+			total_iter = int(temp[1])
 			accum[alg] += float(result1) / result0
-			result_str += '\t' + str(float(result1) / result0)
+			accum_iter[alg] += float(total_iter)/param[0] # compute iterations per iterator
+			result_str += '\t' + str(float(result1) / result0) + '\t' + str(float(total_iter)/param[0])
 
 		# calculate/write verbose output
 		line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param + (r+1,))).strip()
@@ -105,7 +109,7 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 	# write averages
 	line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param)).strip()
 	for alg in ALGS:
-		line += '\t' + str(accum[alg]/runs)
+		line += '\t' + str(accum[alg]/runs) + '\t' + str(accum_iter[alg]/runs)
 	line += '\n'
 
 	outputfile.write(line)
