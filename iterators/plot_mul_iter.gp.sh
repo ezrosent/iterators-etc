@@ -1,3 +1,4 @@
+# See TODO
 reset 
 
 # uncomment the following lint to get the output on the terminal
@@ -24,6 +25,9 @@ incR = 1
 fline = flineI
 lline = flineI + incI - 1
 
+tempFline = fline + incI
+tempLline = lline + incI
+
 print "incI = " . incI . " incU = " . incU . " incD = " . incD . " incC = " . incC . " incR = " . incR
 
 
@@ -32,8 +36,8 @@ startCol = "`wc -l < config.txt`" + 1
 nPlotsY = words(nRange)
 nPlotsX = words(nWeightConfig)
 
-do for [l=1:words(nIterators)] {
-  do for [m=1:words(nDuration)] {
+# TODO: make it work for multiple durations as well
+#  do for [m=1:words(nDuration)] {
 
     #colors = "red green blue violet pink"
     titles = "HS UBST"
@@ -49,7 +53,7 @@ do for [l=1:words(nIterators)] {
     sizeY = deltaY
 
     #set the name of the output file
-    set output outputDir."/iterators_" . word(nIterators, l) . "_dur_" . word(nDuration, m) . ".png" 
+    set output outputDir. "/dur_" . word(nDuration, 1) . ".png" 
     set term png size 1200,1200
 
     # size x, y tells the percentage of width and height of the plot window.
@@ -79,11 +83,15 @@ do for [l=1:words(nIterators)] {
 	    set origin originX,originY
             originX = originX + deltaX;
 	    print "fline = ". fline . " lline = ".lline
-	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline::lline title word(titles,i) with linespoints linewidth 2 pointsize 1
+	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline::lline with linespoints linewidth 2 pointsize 1, \
+	    	for [i=1:nLines] "output.txt" using 2:columns(i) every incU::tempFline::tempLline with linespoints linewidth 2 pointsize 1
+	    # TODO: make it generic for more than 2 iterators
 	    fline = fline + incC
+	    tempFline = tempFline + incC
        }
        flineD = flineD + incR
        fline = flineD
+       tempFline = fline + incI
     }
 
     #############################################
@@ -107,16 +115,16 @@ do for [l=1:words(nIterators)] {
     set xrange [-1:1]
     set yrange [-1:1]
 
-    plot for [i=1:nLines] NaN title word(titles,i) with linespoints linewidth 2 pointsize 1
+    plot for [i=1:nLines] NaN title word(titles,i)."_1" with linespoints linewidth 2 pointsize 1, \
+   	 for [i=1:nLines] NaN title word(titles,i)."_2" with linespoints linewidth 2 pointsize 1
 
     unset multiplot
 
     # set everything back for the next plot
     reset
-  } # closing for nRange
+#  } # closing for nduration
 
-  flineI = flineI + incI
-  fline = flineI
-  lline = flineI + incI - 1
-  flineD = flineI
-} # closing for nIterators
+#  flineI = flineI + incI
+#  fline = flineI
+#  lline = flineI + incI - 1
+#  flineD = flineI
