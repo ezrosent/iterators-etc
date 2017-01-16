@@ -11,8 +11,11 @@ nDuration = "`head -3 config.txt | tail -1`"
 nWeightConfig = "`head -4 config.txt | tail -1`"
 nRange = "`head -5 config.txt | tail -1`"
 
-flineI = 1
-flineD = flineI
+# TODO: fix this. Should automatically be filled
+rangeTitle = "[0,4096] [0,16384] [0,65536]"
+
+flineI = 1   # first line iterators
+flineD = flineI # first line duration
 incI = words(nUpdaters) * words(nDuration) * words(nWeightConfig) * words(nRange)
 incU = words(nDuration) * words(nWeightConfig) * words(nRange)
 incD = words(nWeightConfig) * words(nRange)
@@ -46,7 +49,7 @@ do for [l=1:words(nIterators)] {
     sizeY = deltaY
 
     #set the name of the output file
-    set output outputDir."/iterators_" . word(nIterators, l) . "dur_" . word(nDuration, m) . ".png" 
+    set output outputDir."/iterators_" . word(nIterators, l) . "_dur_" . word(nDuration, m) . ".png" 
     set term png size 1200,1200
 
     # size x, y tells the percentage of width and height of the plot window.
@@ -72,7 +75,7 @@ do for [l=1:words(nIterators)] {
         originX = 0;
         originY = originY - deltaY;
         do for [j=1:nPlotsX] { # 3 cols
-	    set title "config = " . word(nWeightConfig,j) . ", range = " . word(nRange,k) font ", 14"
+	    set title "dis = " . word(nWeightConfig,j) . ", range = " . word(rangeTitle,k) font ", 14"
 	    set origin originX,originY
             originX = originX + deltaX;
 	    print "fline = ". fline . " lline = ".lline
