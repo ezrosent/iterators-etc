@@ -17,12 +17,12 @@ def to_str(data):
 		return return_str
 
 ALGS = ["hash", "ubst"]#, "list"] 
-ITERATORS_NUM = [1, 2] # Compare against 0
-UPDATERS_NUM = [1, 3, 5, 7, 9, 11, 13, 15]
+ITERATORS_NUM = [1]#, 2] # Compare against 0
+UPDATERS_NUM = [1, 3]#, 5, 7, 9, 11, 13, 15]
 DURATION = [2]#, 4] #, 10]
-PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
-RANGE_SIZE = [(4096, 2048), (16384, 8192), (65536, 32768)]
-runs = 10
+PERCENTAGES = [(25, 25, 50)]#, (50, 50, 0)]
+RANGE_SIZE = [(4096, 2048)]#, (16384, 8192), (65536, 32768)]
+runs = 1
 
 op_prefix = "op_file"
 init_prefix = "init_file"
@@ -90,7 +90,7 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 		for alg in ALGS:
 			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE)
 			result0 = int(pTest0.communicate()[0].strip().split("+")[0]) # without iterators
-			pTest1 = Popen(makeargs(param, alg, param[0], "iter"), stdout=PIPE)
+			pTest1 = Popen(makeargs(param, alg, param[0], "iter/" + alg), stdout=PIPE)
 			temp = pTest1.communicate()[0].strip().split("+")
 			result1 = int(temp[0]) # with iterators
 			total_iter = int(temp[1])
