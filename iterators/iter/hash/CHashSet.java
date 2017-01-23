@@ -227,7 +227,8 @@ class CHashSet implements SetInterface
 			}
 			else {
 				// Make a copy of the bucket for iteration
-				b = new FSet((HashNode [])(t.buckets.get(i).head));
+				//b = new FSet((HashNode [])(t.buckets.get(i).head));
+				b = new FSet(t.buckets.get(i).head);
 			}
 			// iterate b
                         //System.out.println("Bucket size: " + ((Node [])(b.head)).length);

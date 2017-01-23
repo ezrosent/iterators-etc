@@ -44,11 +44,22 @@ class FSet
     }
 
     // copy constructor
-    public FSet(HashNode [] arr)
+/*    public FSet(HashNode [] arr)
     {
         head = arr;
     }
+*/
 
+    // copy constructor
+    public FSet(Object o) 
+    {
+	if (o instanceof HashNode[]) {
+	    head = (HashNode [])o;
+	} else {
+	    head = ((FreezeMarker)o).arr;
+	}
+    }
+    
     // TODO: pass snapcollector here as a parameter
     public int invoke(int tid, boolean insert, int key, SnapCollector<HashNode> sc)
     {
