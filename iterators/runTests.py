@@ -96,7 +96,7 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 			total_iter = int(temp[1])
 			accum[alg] += float(result1) / result0
 			accum_iter[alg] += float(total_iter) # compute iterations 
-			result_str += '\t' + str(float(result1) / result0) + '\t' + str(float(total_iter)/param[0])
+			result_str += '\t' + str(float(result1) / result0) + '\t' + str(float(total_iter))
 
 		# calculate/write verbose output
 		line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param + (r+1,))).strip()
