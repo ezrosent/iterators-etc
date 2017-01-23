@@ -18,7 +18,7 @@ def to_str(data):
 
 ALGS = ["hash", "ubst"]#, "list"] 
 ITERATORS_NUM = [1]#, 2] # Compare against 0
-UPDATERS_NUM = [1, 3]#, 5, 7, 9, 11, 13, 15]
+UPDATERS_NUM = [1]#, 3]#, 5, 7, 9, 11, 13, 15]
 DURATION = [2]#, 4] #, 10]
 PERCENTAGES = [(25, 25, 50)]#, (50, 50, 0)]
 RANGE_SIZE = [(4096, 2048)]#, (16384, 8192), (65536, 32768)]

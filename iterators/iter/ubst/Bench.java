@@ -12,13 +12,13 @@ class Bench {
     // Note that the total number of threads should be
     // no more than NUM_THREADS defined in SnapCollector.java
 
-    public static int ITERATORS_NUM = 1;
-    public static int UPDATERS_NUM = 24;
-    public static int DURATION = 5;
+    public static int ITERATORS_NUM = 2;
+    public static int UPDATERS_NUM = 0;
+    public static int DURATION = 2;
 
     public static int KEY_RANGE = 4096;
-    public static int INIT_SIZE = 1024;
-    public static String ALG_NAME = "list";
+    public static int INIT_SIZE = 10;
+    public static String ALG_NAME = "hash";
     public static boolean DEACTIVATE = true;
     public static String OP_FILE = "op_file.txt";
     public static String INIT_FILE = "init_file.txt";
@@ -114,17 +114,17 @@ class Bench {
     // Move file of operations into a list, for fast access
     // Divide them among the updater threads
     private static void InitializeOps() throws IOException, FileNotFoundException {
-        BufferedReader br = new BufferedReader(new FileReader(Bench.OP_FILE));
+	BufferedReader br = new BufferedReader(new FileReader(Bench.OP_FILE));
         ops = new ArrayList<List<String>>();
         for (int id = 0; id < UPDATERS_NUM; id++) ops.add(new ArrayList<String>());
-
+	
         int id = 0;
         String line = null;
         while ((line = br.readLine()) != null) {
             ops.get(id).add(line);
             id = (id + 1) % UPDATERS_NUM;
         }
-
+	
         br.close();
     }
 

@@ -68,7 +68,8 @@ CLASSES_ORIG = $(ORIG_PATH)/SetInterface.java \
 	  $(ORIG_PATH)/IteratorThread.java
 
 # do not change the order or else set $CURR_PATH accordingly
-default: classes_orig classes_ubst_iter classes_hs_iter classes_ll_iter
+default: classes_orig classes_ubst_iter classes_hs_iter 
+	#classes_ll_iter
 
 # Below we are replacing the suffix .java of all words in the macro CLASSES 
 # with the .class suffix
