@@ -53,6 +53,9 @@ outputfile.write("ITER\tUPDT\tTIME\tCFIG\tSIZE" + header_end)
 verbose = open("output_verbose.txt", 'w')
 verbose.write("ITER\tUPDT\tTIME\tCFIG\tSIZE\tRUN" + header_end)
 
+# Open the error file
+errfile = open("error.txt", "w")
+
 PARAMETER_COMBINATIONS = [ITERATORS_NUM, UPDATERS_NUM, DURATION, PERCENTAGES, RANGE_SIZE]
 
 # Make argument list for Popen to start a Java execution
@@ -88,15 +91,24 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 	for r in xrange(runs):
 		result_str = ""
 		for alg in ALGS:
-			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE)
-			result0 = int(pTest0.communicate()[0].strip().split("+")[0]) # without iterators
-			pTest1 = Popen(makeargs(param, alg, param[0], "iter/" + alg), stdout=PIPE)
-			temp = pTest1.communicate()[0].strip().split("+")
+			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE, stderr=PIPE)
+			out0, err0 = pTest0.communicate()
+			result0 = int(out0.strip().split("+")[0]) # without iterators
+			pTest1 = Popen(makeargs(param, alg, param[0], "iter/" + alg), stdout=PIPE, stderr=PIPE)
+			out1, err1 = pTest1.communicate()
+			temp = out1.strip().split("+")
 			result1 = int(temp[0]) # with iterators
 			total_iter = int(temp[1])
 			accum[alg] += float(result1) / result0
 			accum_iter[alg] += float(total_iter) # compute iterations 
 			result_str += '\t' + str(float(result1) / result0) + '\t' + str(float(total_iter))
+			# if an error occurs, write it to the error file
+			if err0:
+				print err0
+				errfile.write(err0)
+			if err1:
+				print err1
+				errfile.write(err1)
 
 		# calculate/write verbose output
 		line = reduce(lambda x, y: x + y, map(lambda x: to_str(x) + '\t', param + (r+1,))).strip()
@@ -116,3 +128,4 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 
 outputfile.close()
 verbose.close()
+errfile.close()
