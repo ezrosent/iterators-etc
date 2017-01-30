@@ -26,6 +26,6 @@ python runTests.py
 #gnuplot -e "outputDir='Output/$currentDate'" plot.gp.sh
 
 # move the output to the correct directory in Output
-mv config.txt output.txt output_verbose.txt lscpu_info.txt cpuinfo_info.txt Output/$currentDate
+mv config.txt output.txt output_verbose.txt lscpu_info.txt cpuinfo_info.txt error.txt Output/$currentDate
 
 
