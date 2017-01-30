@@ -38,7 +38,7 @@ public class SnapCollector<T> {
 	// Implemented according to the optimization in A.3:
 	// Only accept nodes whose key is higher than the last, and return the last node.
 	public T AddNode(T node, int key) {
-		NodeWrapper<T> last = tail.get();
+	/*	NodeWrapper<T> last = tail.get();
 		if (last.key >= key) // trying to add an out of place node.
 			return last.node;
 		
@@ -58,6 +58,20 @@ public class SnapCollector<T> {
 		else {
 			return tail.get().node;
 		}
+		*/
+		T uselessNode = node;
+		NodeWrapper<T> newNode = new NodeWrapper<T>();
+		newNode.node = node;
+		newNode.key = key;
+		while(true) {
+		    NodeWrapper<T> last = tail.get();
+		    if (last.key >= key) // trying to add an out of place node.
+			    return uselessNode;
+		    newNode.next.set(last);
+		    if (tail.compareAndSet(last, newNode)) {
+			    return uselessNode;
+		    }
+		}
 	}
 	
 	public void Report(int tid, T Node, ReportType t, int key) {
@@ -72,10 +86,11 @@ public class SnapCollector<T> {
 	}
 	
 	public void BlockFurtherPointers() {
+		/*
 		NodeWrapper<T> blocker = new NodeWrapper<T>();
 		blocker.node = null;
 		blocker.key = Integer.MAX_VALUE; 
-		tail.set(blocker);
+		tail.set(blocker);*/
 	}
 	
 	public void Deactivate() {
@@ -117,12 +132,22 @@ public class SnapCollector<T> {
 		ArrayList<CompactReportItem> allReports = new ArrayList<CompactReportItem>();
 		for (int i = 0; i < NUM_THREADS; i++) {
 			AddReports(allReports, reportHeads[i]);
-			if (gAllReports.get() != null)
-				return;
+			if (gAllReports.get() != null) {
+			    return;
+			}
 		}
 		Collections.sort(allReports);
 		//System.out.println("How many reports you ask?" + allReports.size());
-		gAllReports.compareAndSet(null, allReports);
+		if (gAllReports.compareAndSet(null, allReports)) {
+		    /*
+		    //System.out.println("report start");
+		    for (CompactReportItem c : allReports) {
+			    if (c.t == ReportType.remove)
+			    System.out.println(c.key + " " + c.t);
+		    }
+		    //System.out.println("report end");
+		    */
+		}
 		return;
 	}
 	
@@ -136,32 +161,33 @@ public class SnapCollector<T> {
 	}
 
 	public T GetNext(int tid) {
+		//System.out.println("hello");
 		NodeWrapper<T> currLoc = (NodeWrapper<T>)currLocations[tid];
 		int currRepLoc = currRepLocations[tid];
 		ArrayList<CompactReportItem> allReports = gAllReports.get();
 		bigloop : while (true) { 
 			CompactReportItem rep = null;
-			int repKey = Integer.MAX_VALUE;
+			int repKey = Integer.MIN_VALUE;
 			if (allReports.size() > currRepLoc) {
 				rep = allReports.get(currRepLoc);
 				repKey = rep.key;
 			}
-			int nodeKey = Integer.MAX_VALUE;
+			int nodeKey = Integer.MIN_VALUE;
 			NodeWrapper<T> next = currLoc.next.get();
 			if (next != null)
-				nodeKey = next.key;
+				nodeKey = currLoc.key;
 
 			// Option 1: node key < rep key. Return node.
-			if (nodeKey < repKey) {
+			if (nodeKey > repKey) {
 				currLocations[tid] = next;
 				currRepLocations[tid] = currRepLoc; 
-				return next.node;
+				return currLoc.node;
 			}
 
 			// Option 2: node key == rep key 
 			if (nodeKey == repKey) {
 				// 2.a - both are infinity - iteration done.
-				if (nodeKey == Integer.MAX_VALUE) {
+				if (nodeKey == Integer.MIN_VALUE) {
 					currLocations[tid] = currLoc;
 					currRepLocations[tid] = currRepLoc;
 					return null;
@@ -220,7 +246,7 @@ public class SnapCollector<T> {
 			}
 
 			// Option 3: node key > rep key
-			if (nodeKey > repKey) {
+			if (nodeKey < repKey) {
 				// skip not-needed reports
 				while (currRepLoc+1 < allReports.size()) {
 					CompactReportItem nextRep = allReports.get(currRepLoc+1);
