@@ -51,7 +51,7 @@ do for [l=1:words(nIterators)] {
     sizeY = deltaY
 
     #set the name of the output file
-    set output outputDir."/iterators_" . word(nIterators, l) . "_dur_" . word(nDuration, m) . ".png" 
+    set output outputDir."/updaters_" . word(nIterators, l) . "_dur_" . word(nDuration, m) . ".png" 
     set term png size 1200,1200
 
     # size x, y tells the percentage of width and height of the plot window.

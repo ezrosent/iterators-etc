@@ -22,8 +22,10 @@ chmod 777 Output/$currentDate
 # run the tests
 python runTests.py
 #create the plots
-#gnuplot -e "outputDir='Output/$currentDate'" plot_mul_iter.gp.sh
-#gnuplot -e "outputDir='Output/$currentDate'" plot.gp.sh
+#gnuplot -e "outputDir='Output/$currentDate'" plot_updater_com.gp.sh
+#gnuplot -e "outputDir='Output/$currentDate'" plot_updater.gp.sh
+#gnuplot -e "outputDir='Output/$currentDate'" plot_iterator_com.gp.sh
+#gnuplot -e "outputDir='Output/$currentDate'" plot_iterator.gp.sh
 
 # move the output to the correct directory in Output
 mv config.txt output.txt output_verbose.txt lscpu_info.txt cpuinfo_info.txt error.txt Output/$currentDate

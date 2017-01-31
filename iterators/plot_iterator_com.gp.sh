@@ -22,26 +22,12 @@ incU = words(nDuration) * words(nWeightConfig) * words(nRange)
 incD = words(nWeightConfig) * words(nRange)
 incC = words(nRange)
 incR = 1
+
 fline = flineI
-lline = flineI + incI - 1
-
-fline1 = fline + incI
-lline1 = lline + incI
-
-fline2 = fline1 + incI
-lline2 = lline1 + incI
-
-fline3 = fline2 + incI
-lline3 = lline2 + incI
-
-fline4 = fline3 + incI
-lline4 = lline3 + incI
-
-fline5 = fline4 + incI
-lline5 = lline4 + incI
-
-fline6 = fline5 + incI
-lline6 = lline5 + incI
+fline1 = fline + incU
+fline2 = fline1 + incU
+fline3 = fline2 + incU
+fline4 = fline3 + incU
 
 print "incI = " . incI . " incU = " . incU . " incD = " . incD . " incC = " . incC . " incR = " . incR
 
@@ -58,7 +44,7 @@ nPlotsX = words(nWeightConfig)
     titles = "HS UBST"
     #markers = "1 2 3 5 6"  # ["cross", "3 lines cross", "filled square"]
     #linetype = "1 2 3 4" # ["solid", "dashed", "smaller dashes", "smaller dashes"]
-    columns(x) = ((2 * x) - 1) + (startCol - 1)
+    columns(x) = ((2 * x) - 1) + (startCol)
     titleMargin = 0.03
     originX = 0
     originY = 1 - titleMargin  # 0.01 to accommodate the heading and legend
@@ -68,7 +54,7 @@ nPlotsX = words(nWeightConfig)
     sizeY = deltaY
 
     #set the name of the output file
-    set output outputDir. "/dur_" . word(nDuration, 1) . ".png" 
+    set output outputDir. "/iterator_dur_" . word(nDuration, 1) . ".png" 
     set term png size 1200,1200
 
     # size x, y tells the percentage of width and height of the plot window.
@@ -78,13 +64,13 @@ nPlotsX = words(nWeightConfig)
     unset key
 
     # fix the values on x-axis
-    set xtics nUpdaters
+    set xtics nIterators
 
     # fix the values on y-axis
-    set yrange[0.0:1.5]
+    #set yrange[0.0:1.5]
 
-    set xlabel "Number of updaters" font ", 16" #font "Times New Roman, 8"
-    set ylabel "Slowdown" font ", 16" #font "Times New Roman, 8"
+    set xlabel "Number of iterators" font ", 16" #font "Times New Roman, 8"
+    set ylabel "Total operations" font ", 16" #font "Times New Roman, 8"
     #set key at 0,0 horizontal box
     unset key
     set size sizeX,sizeY
@@ -97,31 +83,26 @@ nPlotsX = words(nWeightConfig)
 	    set title "dis = " . word(nWeightConfig,j) . ", range = " . word(rangeTitle,k) font ", 14"
 	    set origin originX,originY
             originX = originX + deltaX;
-	    print "fline = ". fline . " lline = ".lline
-	    plot for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline::lline with linespoints linewidth 2 pointsize 1, \
-	    	for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline1::lline1 with linespoints linewidth 2 pointsize 1, \
-	    	for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline2::lline2 with linespoints linewidth 2 pointsize 1, \
-	    	for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline3::lline3 with linespoints linewidth 2 pointsize 1, \
-	    	for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline4::lline4 with linespoints linewidth 2 pointsize 1, \
-	    	for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline5::lline5 with linespoints linewidth 2 pointsize 1, \
-	    	for [i=1:nLines] "output.txt" using 2:columns(i) every incU::fline6::lline6 with linespoints linewidth 2 pointsize 1 
+	    #print "fline = ". fline . " lline = ".lline
+	    plot for [i=1:nLines] "output.txt" using 1:columns(i) every incI::fline with linespoints linewidth 2 pointsize 1, \
+	    	for [i=1:nLines] "output.txt" using 1:columns(i) every incI::fline1 with linespoints linewidth 2 pointsize 1, \
+	    	for [i=1:nLines] "output.txt" using 1:columns(i) every incI::fline2 with linespoints linewidth 2 pointsize 1, \
+	    	for [i=1:nLines] "output.txt" using 1:columns(i) every incI::fline3 with linespoints linewidth 2 pointsize 1, \
+	    	for [i=1:nLines] "output.txt" using 1:columns(i) every incI::fline4 with linespoints linewidth 2 pointsize 1
+
 	    # TODO: make it generic for more than 2 iterators
 	    fline = fline + incC
 	    fline1 = fline1 + incC
 	    fline2 = fline2 + incC
 	    fline3 = fline3 + incC
 	    fline4 = fline4 + incC
-	    fline5 = fline5 + incC
-	    fline6 = fline6 + incC
        }
        flineD = flineD + incR
        fline = flineD
-       fline1 = fline + incI
-       fline2 = fline1 + incI
-       fline3 = fline2 + incI
-       fline4 = fline3 + incI
-       fline5 = fline4 + incI
-       fline6 = fline5 + incI
+       fline1 = fline + incU
+       fline2 = fline1 + incU
+       fline3 = fline2 + incU
+       fline4 = fline3 + incU
     }
 
     #############################################
@@ -145,13 +126,12 @@ nPlotsX = words(nWeightConfig)
     set xrange [-1:1]
     set yrange [-1:1]
 
+    #TODO automate the titles : 1, 3, 5, ... should be generated automatically
     plot for [i=1:nLines] NaN title word(titles,i)."_1" with linespoints linewidth 2 pointsize 1, \
-   	 for [i=1:nLines] NaN title word(titles,i)."_2" with linespoints linewidth 2 pointsize 1, \
    	 for [i=1:nLines] NaN title word(titles,i)."_3" with linespoints linewidth 2 pointsize 1, \
-   	 for [i=1:nLines] NaN title word(titles,i)."_4" with linespoints linewidth 2 pointsize 1, \
    	 for [i=1:nLines] NaN title word(titles,i)."_5" with linespoints linewidth 2 pointsize 1, \
-   	 for [i=1:nLines] NaN title word(titles,i)."_6" with linespoints linewidth 2 pointsize 1, \
-   	 for [i=1:nLines] NaN title word(titles,i)."_7" with linespoints linewidth 2 pointsize 1
+   	 for [i=1:nLines] NaN title word(titles,i)."_7" with linespoints linewidth 2 pointsize 1, \
+   	 for [i=1:nLines] NaN title word(titles,i)."_9" with linespoints linewidth 2 pointsize 1
 
     unset multiplot
 
