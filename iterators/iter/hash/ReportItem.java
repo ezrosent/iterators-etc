@@ -32,7 +32,8 @@ class CompactReportItem implements Comparable{
 	public int compareTo(Object arg0) {
 		CompactReportItem other = (CompactReportItem)arg0;
 		if (this.key != other.key)
-			return this.key - other.key;
+			return other.key - this.key;
+			//return this.key - other.key;
 		//if (this.id != other.id)
 		//	return this.id - other.id;
 		if (this.node != other.node)

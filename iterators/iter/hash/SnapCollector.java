@@ -20,12 +20,12 @@ public class SnapCollector<T> {
 	    
 	    public int compareTo(Object arg0) {
 		NodeWrapper<V> other = (NodeWrapper<V>)arg0;
-		if (this.key == Integer.MIN_VALUE) {
+		if ((this.key == Integer.MIN_VALUE) || (other.key == Integer.MAX_VALUE)){
 		    return -1;
-		} else if (other.key == Integer.MIN_VALUE) {					
+		} else if ((other.key == Integer.MIN_VALUE) || (this.key == Integer.MAX_VALUE)) {					
 		    return 1;
 		}
-		return this.key - other.key;
+		return other.key - this.key;
 	    }
 	}
 	
@@ -35,6 +35,7 @@ public class SnapCollector<T> {
 	NodeWrapper<T> head;
 	AtomicReference<NodeWrapper<T>> tail;
 	ReportItem blocker = new ReportItem(null, ReportType.add,-1); 
+	NodeWrapper<T> blocker_snapshot;
 	volatile boolean active;
 
 	public SnapCollector() {
@@ -49,6 +50,10 @@ public class SnapCollector<T> {
 			reportHeads[i] = new ReportItem(null, ReportType.add,-1); // sentinel head.
 			reportTails[i] = reportHeads[i];
 		}
+
+		blocker_snapshot = new NodeWrapper<T>();
+		blocker_snapshot.key = Integer.MAX_VALUE;
+		blocker_snapshot.node = null;
 	}
 
 	// Implemented according to the optimization in A.3:
@@ -57,7 +62,12 @@ public class SnapCollector<T> {
 	public T AddNode(T node, int key) {
 	    NodeWrapper<T> last;
 	    T useless = node;
-	    while (true) {
+	    
+	    NodeWrapper<T> newNode = new NodeWrapper<T>();
+    	    newNode.node = node;
+	    newNode.key = key;
+	    
+	/*    while (true) {
 		last = tail.get();										
 		if (last.next.get() != null) {
 		    if (last == tail.get()) {
@@ -65,15 +75,24 @@ public class SnapCollector<T> {
 		    }
 		}													
 		last = tail.get();
-		NodeWrapper<T> newNode = new NodeWrapper<T>();
-		newNode.node = node;
-		newNode.key = key;
 		if (last.next.compareAndSet(null, newNode)) {
 		    tail.compareAndSet(last, newNode);
 		    break; // break only if node is added
 		}
 	    }
 	    return useless;
+	    */
+
+	    while(true) {
+		last = tail.get();		
+		if (last == blocker_snapshot) {
+		    return useless;
+		}
+		newNode.next.set(last);
+		if (tail.compareAndSet(last, newNode)) {
+		    return useless;
+		}
+	    }
 	}
 	
 	public void Report(int tid, T Node, ReportType t, int key) {
@@ -88,10 +107,14 @@ public class SnapCollector<T> {
 	}
 	
 	public void BlockFurtherPointers() {
+	/*	
 		NodeWrapper<T> blocker = new NodeWrapper<T>();
 		blocker.node = null;
 		blocker.key = Integer.MAX_VALUE; 
 		tail.set(blocker);
+	*/
+		blocker_snapshot.next.compareAndSet(null, tail.get());
+		tail.set(blocker_snapshot);
 	}
 	
 	public void Deactivate() {
@@ -163,7 +186,7 @@ public class SnapCollector<T> {
 	    } else {
 		ArrayList<NodeWrapper<T>> sortedSnapshotNodes = new ArrayList<NodeWrapper<T>>();
 		// create a local copy of snapshot nodes in an array (unsorted)
-		AddSnapshotNodes(sortedSnapshotNodes, head);
+		AddSnapshotNodes(sortedSnapshotNodes, tail.get());
 		// sort the nodes
 		Collections.sort(sortedSnapshotNodes);
 		ArrayList<NodeWrapper<T>> snapshotNodes = new ArrayList<NodeWrapper<T>>();
@@ -176,7 +199,7 @@ public class SnapCollector<T> {
 	}
 
 	private void AddSnapshotNodes(ArrayList<NodeWrapper<T>> snapshotNodes, NodeWrapper<T> localHead) {
-	    NodeWrapper tempNode;
+	    NodeWrapper<T> tempNode;
 	    while(localHead != null) {
 		tempNode = new NodeWrapper<T>();
 		tempNode.key = localHead.key;
@@ -211,18 +234,18 @@ public class SnapCollector<T> {
 		ArrayList<CompactReportItem> allReports = gAllReports.get();
 		bigloop : while (true) { 
 			CompactReportItem rep = null;
-			int repKey = Integer.MAX_VALUE;
+			int repKey = Integer.MIN_VALUE;
 			if (allReports.size() > currRepLoc) {
 				rep = allReports.get(currRepLoc);
 				repKey = rep.key;
 			}
-			int nodeKey = Integer.MAX_VALUE;
+			int nodeKey = Integer.MIN_VALUE;
 			NodeWrapper<T> next = currLoc.next.get();
 			if (next != null)
 				nodeKey = next.key;
 
 			// Option 1: node key < rep key. Return node.
-			if (nodeKey < repKey) {
+			if (nodeKey > repKey) {
 				currLocations[tid] = next;
 				currRepLocations[tid] = currRepLoc; 
 				return next.node;
@@ -231,7 +254,7 @@ public class SnapCollector<T> {
 			// Option 2: node key == rep key 
 			if (nodeKey == repKey) {
 				// 2.a - both are infinity - iteration done.
-				if (nodeKey == Integer.MAX_VALUE) {
+				if (nodeKey == Integer.MIN_VALUE) {
 					currLocations[tid] = currLoc;
 					currRepLocations[tid] = currRepLoc;
 					return null;
@@ -290,7 +313,7 @@ public class SnapCollector<T> {
 			}
 
 			// Option 3: node key > rep key
-			if (nodeKey > repKey) {
+			if (nodeKey < repKey) {
 				// skip not-needed reports
 				while (currRepLoc+1 < allReports.size()) {
 					CompactReportItem nextRep = allReports.get(currRepLoc+1);
