@@ -29,6 +29,9 @@ class CompactReportItem implements Comparable{
 		this.key = key;
 	}
 
+	// Assumption of GetNext : Add reports should come before the delete reports 
+	// if the nodes are same
+	// else any ordering is ok
 	public int compareTo(Object arg0) {
 		CompactReportItem other = (CompactReportItem)arg0;
 		if (this.key != other.key)

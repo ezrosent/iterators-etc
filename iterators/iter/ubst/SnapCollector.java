@@ -19,6 +19,7 @@ public class SnapCollector<T> {
 	NodeWrapper<T> head;
 	AtomicReference<NodeWrapper<T>> tail;
 	ReportItem blocker = new ReportItem(null, ReportType.add,-1); 
+	NodeWrapper<T> blocker_snapshot;
 	volatile boolean active;
 
 	public SnapCollector() {
@@ -33,6 +34,10 @@ public class SnapCollector<T> {
 			reportHeads[i] = new ReportItem(null, ReportType.add,-1); // sentinel head.
 			reportTails[i] = reportHeads[i];
 		}
+
+		blocker_snapshot = new NodeWrapper<T>();
+		blocker_snapshot.key = Integer.MAX_VALUE;
+		blocker_snapshot.node = null;
 	}
 
 	// Implemented according to the optimization in A.3:
@@ -91,6 +96,10 @@ public class SnapCollector<T> {
 		blocker.node = null;
 		blocker.key = Integer.MAX_VALUE; 
 		tail.set(blocker);*/
+
+		// I think this makes it idempotent
+		blocker_snapshot.next.compareAndSet(null, tail.get());
+		tail.set(blocker_snapshot);
 	}
 	
 	public void Deactivate() {
@@ -175,7 +184,7 @@ public class SnapCollector<T> {
 			int nodeKey = Integer.MIN_VALUE;
 			NodeWrapper<T> next = currLoc.next.get();
 			if (next != null)
-				nodeKey = currLoc.key;
+				nodeKey = next.key;
 
 			// Option 1: node key < rep key. Return node.
 			if (nodeKey > repKey) {
