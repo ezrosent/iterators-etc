@@ -92,7 +92,7 @@ class Bench {
     }
 
     private static void InitializeSet() throws IOException, FileNotFoundException {
-        if (ALG_NAME.equals("ubst"))
+        if (ALG_NAME.equals("ubst") || (ALG_NAME.equals("ubst_unop")))
             Bench.set = new BinarySearchTree(DEACTIVATE);
         else if (ALG_NAME.equals("hash"))
             Bench.set = new CHashSet(DEACTIVATE);

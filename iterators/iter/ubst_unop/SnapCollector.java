@@ -7,27 +7,20 @@ public class SnapCollector<T> {
 	// tids are expected to be 0...NUM_THREADS-1
 	static int NUM_THREADS = 64;
 	
-	/*class NodeWrapper<V> {
+	class NodeWrapper<V> implements Comparable{
 		V node;
 		AtomicReference<NodeWrapper<V>> next = new AtomicReference<NodeWrapper<V>>(null);
 		int key;
-	}*/
-
-	class NodeWrapper<V> implements Comparable{
-	    V node;
-	    AtomicReference<NodeWrapper<V>> next = new AtomicReference<NodeWrapper<V>>(null);
-	    int key;
 	    
-	    public int compareTo(Object arg0) {
-		NodeWrapper<V> other = (NodeWrapper<V>)arg0;
-		if ((this.key == Integer.MIN_VALUE) || (other.key == Integer.MAX_VALUE)){
-		    return -1;
-		} else if ((other.key == Integer.MIN_VALUE) || (this.key == Integer.MAX_VALUE)) {					
-		    return 1;
-		}
-		return other.key - this.key;
+		public int compareTo(Object arg0) {
+		    NodeWrapper<V> other = (NodeWrapper<V>)arg0;
+		    if ((this.key == Integer.MIN_VALUE) || (other.key == Integer.MAX_VALUE)){
+		        return -1;
+		    } else if ((other.key == Integer.MIN_VALUE) || (this.key == Integer.MAX_VALUE)) {			      return 1;
+		    }
+		    return other.key - this.key;
+	        }
 	    }
-	}
 	
 	ReportItem[] reportHeads;
 	ReportItem[] reportTails;
@@ -58,41 +51,41 @@ public class SnapCollector<T> {
 
 	// Implemented according to the optimization in A.3:
 	// Only accept nodes whose key is higher than the last, and return the last node.
-	// TODO: returned value is not used anywhere. Change the code to return void
 	public T AddNode(T node, int key) {
-	    NodeWrapper<T> last;
-	    T useless = node;
-	    
-	    NodeWrapper<T> newNode = new NodeWrapper<T>();
-    	    newNode.node = node;
-	    newNode.key = key;
-	    
-	/*    while (true) {
-		last = tail.get();										
+	/*	NodeWrapper<T> last = tail.get();
+		if (last.key >= key) // trying to add an out of place node.
+			return last.node;
+		
 		if (last.next.get() != null) {
-		    if (last == tail.get()) {
-			tail.compareAndSet(last, last.next.get());
-		    }
-		}													
-		last = tail.get();
-		if (last.next.compareAndSet(null, newNode)) {
-		    tail.compareAndSet(last, newNode);
-		    break; // break only if node is added
+			if (last == tail.get())
+				tail.compareAndSet(last, last.next.get());
+			return tail.get().node;
 		}
-	    }
-	    return useless;
-	    */
 
-	    while(true) {
-		last = tail.get();		
-		if (last == blocker_snapshot) {
-		    return useless;
+		NodeWrapper<T> newNode = new NodeWrapper<T>();
+		newNode.node = node;
+		newNode.key = key;
+		if (last.next.compareAndSet(null, newNode)) {
+			tail.compareAndSet(last, newNode);
+			return node;
 		}
-		newNode.next.set(last);
-		if (tail.compareAndSet(last, newNode)) {
-		    return useless;
+		else {
+			return tail.get().node;
 		}
-	    }
+		*/
+		T uselessNode = node;
+		NodeWrapper<T> newNode = new NodeWrapper<T>();
+		newNode.node = node;
+		newNode.key = key;
+		while(true) {
+		    NodeWrapper<T> last = tail.get();
+		    if (last == blocker_snapshot) // trying to add an out of place node.
+			    return uselessNode;
+		    newNode.next.set(last);
+		    if (tail.compareAndSet(last, newNode)) {
+			    return uselessNode;
+		    }
+		}
 	}
 	
 	public void Report(int tid, T Node, ReportType t, int key) {
@@ -107,12 +100,13 @@ public class SnapCollector<T> {
 	}
 	
 	public void BlockFurtherPointers() {
-	/*	
+		/*
 		NodeWrapper<T> blocker = new NodeWrapper<T>();
 		blocker.node = null;
 		blocker.key = Integer.MAX_VALUE; 
-		tail.set(blocker);
-	*/
+		tail.set(blocker);*/
+
+		// I think this makes it idempotent
 		blocker_snapshot.next.compareAndSet(null, tail.get());
 		tail.set(blocker_snapshot);
 	}
@@ -140,16 +134,16 @@ public class SnapCollector<T> {
 	
 	
 	// What follows is functions that are used to work with the snapshot while it is
-	// already taken. These functions are used to iterate over the nodes of the snapshot.
+	// already taken. These functions are used to iterate over the nodes of the snapshot.Object[] currLocations = new Object[NUM_THREADS];
 	Object[] currLocations = new Object[NUM_THREADS];
 	int[] currRepLocations = new int[NUM_THREADS];
 	AtomicReference<ArrayList<CompactReportItem>> gAllReports = 
 			new AtomicReference<ArrayList<CompactReportItem>>(null);
 	AtomicReference<NodeWrapper<T>> gSortedSnapshot = new AtomicReference<NodeWrapper<T>>(null);	
-
+		
 	// An optimization: sort the reports and nodes.
 	public void Prepare(int tid) {
-		//currLocations[tid] = head;
+	//	currLocations[tid] = head;
 		currRepLocations[tid] = 0;
 		if (gAllReports.get() != null)
 			return;
@@ -157,8 +151,9 @@ public class SnapCollector<T> {
 		ArrayList<CompactReportItem> allReports = new ArrayList<CompactReportItem>();
 		for (int i = 0; i < NUM_THREADS; i++) {
 			AddReports(allReports, reportHeads[i]);
-			if (gAllReports.get() != null)
-				return;
+			if (gAllReports.get() != null) {
+			    return;
+			}
 		}
 		Collections.sort(allReports);
 		//System.out.println("How many reports you ask?" + allReports.size());

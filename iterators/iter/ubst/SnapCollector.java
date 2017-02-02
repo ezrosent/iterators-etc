@@ -190,7 +190,7 @@ public class SnapCollector<T> {
 			if (nodeKey > repKey) {
 				currLocations[tid] = next;
 				currRepLocations[tid] = currRepLoc; 
-				return currLoc.node;
+				return next.node;
 			}
 
 			// Option 2: node key == rep key 
