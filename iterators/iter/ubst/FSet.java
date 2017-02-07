@@ -72,7 +72,9 @@ class FSet
 	    if (insert) {
 		if (ret.retVal == true) { // key was not present, thus inserted
 		     if (casHead(h, ret.arr)) { // CAS is successful
-			 sc.Report(tid, ret.node, ReportType.add, ret.node.key);
+			 if (sc.IsActive()) {
+			     sc.Report(tid, ret.node, ReportType.add, ret.node.key);
+			 }
 			 return ret.arr.length; // return the new length
 		     } else { // CAS failed on the bucket, thus restart
 			 h = head;
@@ -80,9 +82,13 @@ class FSet
 		     }
 		} else { // key was already present ; insert failed
 		     if (ret.node.mark.get() == 0) {
-		        sc.Report(tid, ret.node, ReportType.add, ret.node.key);
+			if (sc.IsActive()) {
+		            sc.Report(tid, ret.node, ReportType.add, ret.node.key);
+			}
 		     } else {
-			 sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+			 if (sc.IsActive()) {
+			     sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+			 }
 		     }
 		     return -(ret.arr.length); // return the old length
 		}
@@ -92,11 +98,15 @@ class FSet
 		} 
 		else { // key was present
 		     if (ret.node.mark.compareAndSet(0, 1)) { // if mark successful
-			 sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+			 if (sc.IsActive()) {    
+			     sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+			 }
 			 tryDelete(h, ret.node);
 			 return 1; // it's ok not to return length because resizing only happens on insert
 		     } else {
-			 sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+			 if (sc.IsActive()) {
+			     sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+			 }
 			 tryDelete(h, ret.node);
 			 h = head;
 			 continue; // restart
@@ -152,10 +162,14 @@ class FSet
 			return false;
 		} else {
 			if (node.mark.get() == 1) {
-				sc.Report(tid, node, ReportType.remove, node.key);
+				if (sc.IsActive()) {
+				    sc.Report(tid, node, ReportType.remove, node.key);
+				}
 				return false;
 			} else {
-				sc.Report(tid, node, ReportType.add, node.key);
+				if (sc.IsActive()) {
+				    sc.Report(tid, node, ReportType.add, node.key);
+				}
 				return true;
 			}
 		}

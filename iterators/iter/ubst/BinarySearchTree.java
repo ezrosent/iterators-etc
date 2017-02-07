@@ -115,7 +115,7 @@ public class BinarySearchTree implements SetInterface
 					sc.Report(tid, seekRecord.leaf, ReportType.add, seekRecord.leaf.key);
 				}
 			}
-			return true;
+			return (!isFlagged(childPointer)); // return true if not flagged, else return false
 		}
 		else
 			return false;
@@ -138,6 +138,7 @@ public class BinarySearchTree implements SetInterface
 			else
 				childAddr = parent.right;
 
+			// key not found => insert it
 			if (leaf.key != key)
 			{
 				//initialize newInternal and newLeaf appropriately
@@ -159,23 +160,22 @@ public class BinarySearchTree implements SetInterface
 
 				boolean result = childAddr.compareAndSet(leaf, newInternal, 0, 0);
 
-				if (result) {
-					// Add the report to "newLeaf" -- 98
+				if (result) { // successfully added
 					if (sc.IsActive()) {
 						// report only if you are not going to be deleted
 						if (key < leaf.key) {
-							if (!isFlagged(newInternal.left)) {
+							if (!isFlagged(newInternal.left)) { // optimization
 								sc.Report(tid, newLeaf, ReportType.add, newLeaf.key);
 							}
 						} else {
-							if (!isFlagged(newInternal.right)) {
+							if (!isFlagged(newInternal.right)) { // optimization
 								sc.Report(tid, newLeaf, ReportType.add, newLeaf.key);
 							}
 						}
 					}
 					return true;
 				}
-				else
+				else // if failed to insert due to concurrent CAS, retry
 				{
 					int[] marks = new int[1];
 					TreeNode address;
@@ -187,12 +187,13 @@ public class BinarySearchTree implements SetInterface
 			}
 			else {
 				// key was already present
-				// Report the "leaf" -- 85
 				if (sc.IsActive()) {
 					// report only if you are not going to be deleted
 					if (!isFlagged(childAddr)) {
 						sc.Report(tid, leaf, ReportType.add, leaf.key);
 					}
+				} else {
+					sc.Report(tid, leaf, ReportType.remove, leaf.key);
 				}
 				return false;
 			}
@@ -219,14 +220,14 @@ public class BinarySearchTree implements SetInterface
 			{
 				leaf = seekRecord.leaf;
 
-				if (leaf.key != key) {
+				if (leaf.key != key) { // key not found
 					return false;
 				}
-
+				// key found
 				//flag it
 				boolean result = childAddr.compareAndSet(leaf, leaf, 0, 2);
 
-				if (result)
+				if (result) // succeeded in marking => return true
 				{
 					mode = false; //mode = CLEANUP
 					boolean done = cleanup(key, tid, seekRecord);
@@ -234,18 +235,21 @@ public class BinarySearchTree implements SetInterface
 						return true;
 					}
 				}
-				else
+				else // failed in marking
 				{
 					int[] marks = new int[1];
 					TreeNode address;
 					address = childAddr.get(marks);
 
-					if (address == leaf && isMarked(childAddr))
+					if (address == leaf && isMarked(childAddr)) // optimization -- make sure it still needs to be cleaned up
 						cleanup(key, tid, seekRecord);
 				}
 			}
 			else //mode == CLEANUP
 			{
+				// Mode becomes false only when a thread successfully marks a node for deletion
+				// once mode becomes false, it's always false.
+				// true is returned iff mode is false
 				if (seekRecord.leaf != leaf) {
 					return true;
 				}
@@ -321,7 +325,7 @@ public class BinarySearchTree implements SetInterface
 			// Physical removal: Report childAddr.node
 			SnapCollector<TreeNode> sc = snapPointer.get();
 			if (sc.IsActive()) {
-				sc.Report(tid, childAddr.getReference(), ReportType.add, key);
+				sc.Report(tid, childAddr.getReference(), ReportType.remove, key);
 			}
 		}
 		return complete;

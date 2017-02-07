@@ -115,7 +115,7 @@ public class BinarySearchTree implements SetInterface
 					sc.Report(tid, seekRecord.leaf, ReportType.add, seekRecord.leaf.key);
 				}
 			}
-			return true;
+			return (!isFlagged(childPointer)); 
 		}
 		else
 			return false;
@@ -192,6 +192,8 @@ public class BinarySearchTree implements SetInterface
 					// report only if you are not going to be deleted
 					if (!isFlagged(childAddr)) {
 						sc.Report(tid, leaf, ReportType.add, leaf.key);
+					} else {
+					    sc.Report(tid, leaf, ReportType.remove, leaf.key);
 					}
 				}
 				return false;
@@ -321,7 +323,7 @@ public class BinarySearchTree implements SetInterface
 			// Physical removal: Report childAddr.node
 			SnapCollector<TreeNode> sc = snapPointer.get();
 			if (sc.IsActive()) {
-				sc.Report(tid, childAddr.getReference(), ReportType.add, key);
+				sc.Report(tid, childAddr.getReference(), ReportType.remove, key);
 			}
 		}
 		return complete;
