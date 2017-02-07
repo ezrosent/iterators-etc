@@ -74,7 +74,7 @@ class CHashSet implements SetInterface
 					? t.buckets.get(key % t.size)
 							: s.buckets.get(key % s.size);
 		}
-		return b.hasMember(key);
+		return b.hasMember(tid, key, snapPointer.get());
 	}
 
 	public boolean simpleInsert(int key, int tid)

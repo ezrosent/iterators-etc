@@ -24,10 +24,12 @@ class FSet
     {
     	public HashNode[] arr; // new FSet created by arrayInsert and arrayRemove
     	public HashNode node; // node that is being inserted or deleted
+	public boolean retVal; // return value
     	
     	public Wrapper() {
     		arr = null;
     		node = null;
+		retVal = false;
     	}
     	
     }
@@ -60,40 +62,103 @@ class FSet
 	}
     }
     
-    // TODO: pass snapcollector here as a parameter
     public int invoke(int tid, boolean insert, int key, SnapCollector<HashNode> sc)
     {
-        Object h = head;
-        Wrapper ret;
-        while (h instanceof HashNode []) {
-        	HashNode [] o = (HashNode [])h;
-        	ret = insert ? arrayInsert(o, key) : arrayRemove(o, key);
-        	HashNode [] n = ret.arr;
-            if (n == o) 
-                return -(n.length + 1);
-            else if (casHead(h, n)) {
-            	// TODO: if CAS successful "report" the "node"
-		if (sc.IsActive()) {
-            	    if (insert) {
-            	        sc.Report(tid, ret.node, ReportType.add, ret.node.key);
-            	    } else {
-            		sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
-            	    }
-		}    
-                return n.length + 1;
-            }
-            h = head;
-        }
-        return 0;
+	Object h = head;
+	Wrapper ret;
+	while (h instanceof HashNode []) {
+	    HashNode [] o = (HashNode [])h;
+	    ret = insert ? arrayInsert(o, key) : arrayRemove(o, key);
+	    if (insert) {
+		if (ret.retVal == true) { // key was not present, thus inserted
+		     if (casHead(h, ret.arr)) { // CAS is successful
+			 sc.Report(tid, ret.node, ReportType.add, ret.node.key);
+			 return ret.arr.length; // return the new length
+		     } else { // CAS failed on the bucket, thus restart
+			 h = head;
+			 continue;
+		     }
+		} else { // key was already present ; insert failed
+		     if (ret.node.mark.get() == 0) {
+		        sc.Report(tid, ret.node, ReportType.add, ret.node.key);
+		     } else {
+			 sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+		     }
+		     return -(ret.arr.length); // return the old length
+		}
+	    } else { // delete operation
+		if (ret.retVal == false) { // key was not present ; delete failed
+		    return -1; // return false (-ve is false)
+		} 
+		else { // key was present
+		     if (ret.node.mark.compareAndSet(0, 1)) { // if mark successful
+			 sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+			 tryDelete(h, ret.node);
+			 return 1; // it's ok not to return length because resizing only happens on insert
+		     } else {
+			 sc.Report(tid, ret.node, ReportType.remove, ret.node.key);
+			 tryDelete(h, ret.node);
+			 h = head;
+			 continue; // restart
+		     }
+		}
+	    }
+	}
+	return 0;
     }
 
-    public boolean hasMember(int key)
+
+    // TODO: possible error: what happens when the set freezes while trying to delete
+    public void tryDelete(Object h, HashNode node) {
+	    //System.out.println("In tryDelete");
+	    while(h instanceof HashNode[]) {
+			//System.out.println("In tryDelete loop");
+			HashNode [] o = (HashNode [])h;
+			boolean found = false;
+			for (int i = 0; i < o.length; i++) {
+				if (o[i] == node) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) { // physical delete of node already happened
+				return;
+			}
+			// else create a new array without node and try CASing
+			HashNode [] n = new HashNode[o.length - 1];
+			int j = 0;
+			for (int i = 0; i < o.length; i++) {
+				if (o[i] != node) {
+					n[j++] = o[i];
+				}
+			}
+			if (casHead(h, n)) { // physical delete successful
+				return;
+			} else {
+				h = head; // update head and continue
+			}
+		}
+		return;			
+	}
+
+    public boolean hasMember(int tid, int key, SnapCollector<HashNode> sc)
     {
         Object h = head;
         HashNode [] arr = (h instanceof HashNode [])
             ? (HashNode [])h
             : ((FreezeMarker)h).arr;
-        return arrayContains(arr, key);
+        HashNode node =  arrayContains(arr, key);
+		if (node == null) {
+			return false;
+		} else {
+			if (node.mark.get() == 1) {
+				sc.Report(tid, node, ReportType.remove, node.key);
+				return false;
+			} else {
+				sc.Report(tid, node, ReportType.add, node.key);
+				return true;
+			}
+		}
     }
 
     public void freeze()
@@ -214,57 +279,66 @@ class FSet
         System.out.println();
     }
 
-    private static boolean arrayContains(HashNode [] o, int key)
+    private static HashNode arrayContains(HashNode [] o, int key)
     {
         for (int i = 0; i < o.length; i++) {
             if (o[i].key == key)
-                return true;
+                return o[i];
         }
-        return false;
+        return null;
     }
 
     // TODO: take one more parameter, say LFArrayFSetNode node
     // this parameter returns the node which is inserted
     private static Wrapper arrayInsert(HashNode [] o, int key)
     {
-    	Wrapper ret = new Wrapper();
-        if (arrayContains(o, key)) {
-        	ret.arr = o;
-        	ret.node = null;
-            return ret;
-        }
-        HashNode [] n = new HashNode[o.length + 1];
-        for (int i = 0; i < o.length; i++)
-            n[i] = o[i];
-        
-        n[n.length - 1] = new HashNode();
-        n[n.length - 1].key = key;
-        
-        ret.arr = n;
-        ret.node = n[n.length - 1];
-        return ret;
+		Wrapper ret = new Wrapper();
+		HashNode node;
+		// key already present
+		if ((node = arrayContains(o, key)) != null) {
+			ret.arr = o;
+			ret.node = node;
+			ret.retVal = false;
+			return ret;
+		}
+		// key not present
+		HashNode [] n = new HashNode[o.length + 1];
+		for (int i = 0; i < o.length; i++)
+			n[i] = o[i];
+
+		n[n.length - 1] = new HashNode();
+		n[n.length - 1].key = key;
+
+		ret.arr = n;
+		ret.node = n[n.length - 1];
+		ret.retVal = true;
+		return ret;
     }
 
     // TODO: take one more parameter, say LFArrayFSetNode node
     // this parameter returns the node which is being deleted
     private static Wrapper arrayRemove(HashNode [] o, int key)
     {
-    	Wrapper ret = new Wrapper();
-        if (!arrayContains(o, key)) {
-        	ret.arr = o;
-        	ret.node = null;
-            return ret;
-        }
-        HashNode [] n = new HashNode[o.length - 1];
-        int j = 0;
-        for (int i = 0; i < o.length; i++) {
-            if (o[i].key != key) {
-                n[j++] = o[i];
-            } else {
-            	ret.arr = n;
-            	ret.node = o[i];
-            }
-        }
-        return ret;
+		Wrapper ret = new Wrapper();
+		HashNode node;
+		if ((node = arrayContains(o, key)) == null) { // key is not present
+			ret.arr = o;
+			ret.node = null;
+			ret.retVal = false;
+			return ret;
+		}
+		// key is present
+		HashNode [] n = new HashNode[o.length - 1];
+		int j = 0;
+		ret.arr = n;
+		ret.node = node;
+		ret.retVal = true;
+		// copy all but the node to be deleted
+		for (int i = 0; i < o.length; i++) {
+			if (o[i].key != key) {
+				n[j++] = o[i];
+			}
+		}
+		return ret;
     }
 }

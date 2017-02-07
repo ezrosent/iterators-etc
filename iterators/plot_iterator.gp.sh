@@ -4,7 +4,7 @@ reset
 # set term dumb
 
 # number of lines in one plot : ie, number of data structures
-nDS = 2 # should be 3 when including LL
+nDS = 3 # should be 3 when including LL
 nIterators = "`head -1 config.txt`"
 nUpdaters = "`head -2 config.txt | tail -1`"
 nDuration = "`head -3 config.txt | tail -1`"
@@ -37,7 +37,7 @@ do for [l=1:words(nUpdaters)] {
   do for [m=1:words(nDuration)] {
 
     #colors = "red green blue violet pink"
-    titles = "HS UBST"
+    titles = "HS UBST UBST_UNOP"
     #markers = "1 2 3 5 6"  # ["cross", "3 lines cross", "filled square"]
     #linetype = "1 2 3 4" # ["solid", "dashed", "smaller dashes", "smaller dashes"]
     #columns(x) = x + (startCol - 1)
