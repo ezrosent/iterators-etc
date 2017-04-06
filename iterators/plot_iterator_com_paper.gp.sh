@@ -86,7 +86,7 @@ nPlotsX = words(nWeightConfig)
 	    plot for [i=1:nLines] "parse_iterator_com_output.txt" using 1:columns(i) every incI::fline with linespoints linewidth 2 pointsize 1, \
 	    	for [i=1:nLines] "parse_iterator_com_output.txt" using 1:columns(i) every incI::fline1 with linespoints linewidth 2 pointsize 1, \
 	    	for [i=1:nLines] "parse_iterator_com_output.txt" using 1:columns(i) every incI::fline2 with linespoints linewidth 2 pointsize 1, \
-	    	for [i=1:nLines] "parse_iterator_com_output.txt" using 1:columns(i) every incI::fline3 with linespoints linewidth 2 pointsize 1, \
+	    	for [i=1:nLines] "parse_iterator_com_output.txt" using 1:columns(i) every incI::fline3 with linespoints linewidth 2 pointsize 1
 
 	    # TODO: make it generic for more than 2 iterators
 	    fline = fline + incC

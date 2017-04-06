@@ -16,6 +16,7 @@ mkdir -p Output
 
 # create a folder with the current time in the Output directory
 currentDate=`date +"%Y-%m-%d-%H-%M"`
+mkdir Output/$currentDate
 mkdir Output/$currentDate/original_plots
 chmod 777 Output/$currentDate/original_plots
 
@@ -39,6 +40,6 @@ gnuplot -e "outputDir='Output/$currentDate/'" plot_iterator_paper.gp.sh
 mv parse_updater_output.txt parse_updater_com_output.txt parse_iterator_output.txt parse_iterator_com_output.txt Output/$currentDate
 
 # move the output to the correct directory in Output
-mv config.txt output.txt output_verbose.txt lscpu_info.txt cpuinfo_info.txt error.txt Output/original_plots/$currentDate
+mv config.txt output.txt output_verbose.txt lscpu_info.txt cpuinfo_info.txt error.txt Output/$currentDate/original_plots
 
 
