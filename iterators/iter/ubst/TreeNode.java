@@ -1,8 +1,9 @@
-import java.util.concurrent.atomic.AtomicStampedReference;
+import java.util.concurrent.atomic.*;
 
 //Node class with integer keys
 public class TreeNode 
 {
+	public volatile AtomicReference<Integer> frameMark = new AtomicReference<Integer>(0);	
 	public final int key;
 	
 	//the least significant bit of the stamp is tag -> sibling getting deleted

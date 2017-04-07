@@ -6,6 +6,7 @@ ITER_UBST_UNOP_PATH = iter/ubst_unop
 ITER_HS_PATH = iter/hash
 ITER_LL_PATH = iter/ll
 CURR_PATH = $(ORIG_PATH)
+#CURR_PATH = $(ITER_UBST_PATH)
 
 .SUFFIXES: .java .class
 
