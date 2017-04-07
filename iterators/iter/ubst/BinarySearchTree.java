@@ -182,14 +182,11 @@ public class BinarySearchTree implements SetInterface
          if (result) { // successfully added
              return true;
          } else {// if failed to insert due to concurrent CAS (concurrent insert or delete)
-            // TODO: we shouldn't be directly returning false, right => some sort of cleanup has to be done right before returning false?
-	    // TODO: CAS might fail also because of concurrent deletion in which case cleanup and then retry 
+            // we shouldn't be directly returning false, right => some sort of cleanup has to be done right before returning false?
 	    int[] marks = new int[1];
             TreeNode address;
             address = childAddr.get(marks);
-	    // TODO: Pseudocode checks for both marking and tagging here but we are testing just for tagging; why?
-            if (address == leaf && marks[0] > 0) { 
-		// TODO: since cleanup_old is not in while loop, is it guaranteed that marked node would have been removed after cleanup_old returns?
+            if (address == leaf && isMarked(childAddr)) { 
                 cleanup_old(key, seekRecord);
 	    }
 	    return false; // signal physical insertion failure to framework insert
