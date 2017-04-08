@@ -130,6 +130,7 @@ public class BinarySearchTree implements SetInterface
     }
 
     public boolean insert(int key, int tid) {
+	TreeNode newLeaf;
         SeekRecord seekRecord = seek(key);
 
 	TreeNode leaf = seekRecord.leaf;
@@ -143,8 +144,8 @@ public class BinarySearchTree implements SetInterface
 		return false;
 	    }
 	} else { // node not found
-	    if (insert_old(key, seekRecord)) {
-	        reportInsert(tid, leaf, leaf.key);
+	    if ((newLeaf = insert_old(key, seekRecord)) != null) {
+	        reportInsert(tid, newLeaf, newLeaf.key);
 		return true;
 	    } else {
 	        return insert(key, tid);
@@ -153,7 +154,7 @@ public class BinarySearchTree implements SetInterface
     }
 
     //  take tid as well
-    public boolean insert_old(int key, SeekRecord seekRecord) {
+    public TreeNode insert_old(int key, SeekRecord seekRecord) {
         TreeNode parent = seekRecord.parent;
         TreeNode leaf = seekRecord.leaf;
 
@@ -180,7 +181,7 @@ public class BinarySearchTree implements SetInterface
          boolean result = childAddr.compareAndSet(leaf, newInternal, 0, 0);
 
          if (result) { // successfully added
-             return true;
+             return newLeaf;
          } else {// if failed to insert due to concurrent CAS (concurrent insert or delete)
             // we shouldn't be directly returning false, right => some sort of cleanup has to be done right before returning false?
 	    int[] marks = new int[1];
@@ -189,7 +190,7 @@ public class BinarySearchTree implements SetInterface
             if (address == leaf && isMarked(childAddr)) { 
                 cleanup_old(key, seekRecord);
 	    }
-	    return false; // signal physical insertion failure to framework insert
+	    return null; // signal physical insertion failure to framework insert
          }
     }
 

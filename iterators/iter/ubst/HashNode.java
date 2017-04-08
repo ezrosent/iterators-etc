@@ -3,6 +3,6 @@ import java.util.*;
 
 class HashNode
 {
-    public AtomicReference<Integer> mark = new AtomicReference<Integer>(0);
+    public AtomicReference<Integer> frameMark = new AtomicReference<Integer>(0);
     public int key;
 }

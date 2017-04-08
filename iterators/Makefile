@@ -26,6 +26,7 @@ CLASSES_UBST_ITER = $(ITER_UBST_PATH)/ReportItem.java \
 	  $(ITER_UBST_PATH)/SeekRecord.java \
 	  $(ITER_UBST_PATH)/BinarySearchTree.java \
 	  $(ITER_UBST_PATH)/HashNode.java \
+	  $(ITER_UBST_PATH)/DummyWrapper.java \
 	  $(ITER_UBST_PATH)/FSet.java \
 	  $(ITER_UBST_PATH)/CHashSet.java \
 	  $(ITER_UBST_PATH)/CLinkedList.java \
@@ -39,6 +40,7 @@ CLASSES_UBST_UNOP_ITER = $(ITER_UBST_UNOP_PATH)/ReportItem.java \
 	  $(ITER_UBST_UNOP_PATH)/SeekRecord.java \
 	  $(ITER_UBST_UNOP_PATH)/BinarySearchTree.java \
 	  $(ITER_UBST_UNOP_PATH)/HashNode.java \
+	  $(ITER_UBST_UNOP_PATH)/DummyWrapper.java \
 	  $(ITER_UBST_UNOP_PATH)/FSet.java \
 	  $(ITER_UBST_UNOP_PATH)/CHashSet.java \
 	  $(ITER_UBST_UNOP_PATH)/CLinkedList.java \
@@ -52,6 +54,7 @@ CLASSES_HS_ITER = $(ITER_HS_PATH)/ReportItem.java \
 	  $(ITER_HS_PATH)/SeekRecord.java \
 	  $(ITER_HS_PATH)/BinarySearchTree.java \
 	  $(ITER_HS_PATH)/HashNode.java \
+	  $(ITER_HS_PATH)/DummyWrapper.java \
 	  $(ITER_HS_PATH)/FSet.java \
 	  $(ITER_HS_PATH)/CHashSet.java \
 	  $(ITER_HS_PATH)/CLinkedList.java \
@@ -65,6 +68,7 @@ CLASSES_LL_ITER = $(ITER_LL_PATH)/ReportItem.java \
 	  $(ITER_LL_PATH)/SeekRecord.java \
 	  $(ITER_LL_PATH)/BinarySearchTree.java \
 	  $(ITER_LL_PATH)/HashNode.java \
+	  $(ITER_LL_PATH)/DummyWrapper.java \
 	  $(ITER_LL_PATH)/FSet.java \
 	  $(ITER_LL_PATH)/CHashSet.java \
 	  $(ITER_LL_PATH)/CLinkedList.java \
