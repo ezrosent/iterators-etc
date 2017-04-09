@@ -264,6 +264,7 @@ class FSet
     // Invariant: is always called with node being present in o
     private static DummyWrapper arrayRemove(HashNode [] o, HashNode node)
     {
+	    //System.out.println("array remove called with " + node.key);
 		DummyWrapper ret = new DummyWrapper();
 		HashNode [] n = new HashNode[o.length - 1];
 		

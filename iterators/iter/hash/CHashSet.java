@@ -86,6 +86,7 @@ class CHashSet implements SetInterface
     }
 
     public boolean insert(int key, int tid) {
+//	System.out.println("calling insert with key " + key);
     	DummyWrapper seekRecord = seek(key);
         HashNode node = seekRecord.node;
         HashNode newNode = null;
@@ -218,6 +219,7 @@ class CHashSet implements SetInterface
         HNode t = head;
         int i = key % t.size;
         while (true) {
+		//System.out.println("apply");
             // if the b is empty, help finish resize
             if (b == null) {
                 helpResize(t, i);
@@ -230,10 +232,10 @@ class CHashSet implements SetInterface
                 if (ret.retVal != 0) { // if operation did not fail because of freezing
                     return ret;
                 }
-                t = head;
-                i = key % t.size;
-                b = t.buckets.get(i);
             }
+            t = head;
+            i = key % t.size;
+            b = t.buckets.get(i);
         }
     }
 
