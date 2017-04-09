@@ -71,32 +71,37 @@ class CHashSet implements SetInterface
         }   
         }
 
-    public HashNode seek(int key) {
+    // returns the FSet and a HashNode (if found)
+    public DummyWrapper seek(int key) {
         HNode t = head;
         FSet b = t.buckets.get(key % t.size);
         if (b == null) {
             HNode s = t.old;
         b = (s == null) ? t.buckets.get(key % t.size) : s.buckets.get(key % s.size);
         }
-        return b.hasMember(key);
+        DummyWrapper seekRecord = new DummyWrapper();
+        seekRecord.fset = b;
+        seekRecord.node = b.hasMember(key);
+        return seekRecord;
     }
 
     public boolean insert(int key, int tid) {
-        HashNode node = seek(key);
+    	DummyWrapper seekRecord = seek(key);
+        HashNode node = seekRecord.node;
         HashNode newNode = null;
 
         if (node != null) { // node found
         if (isFrameMarked(node)) { // node is flagged
             reportDelete(tid, node, node.key);
-            // TODO: define cleanup
-            cleanup(node);
+            //System.out.println("Cleanining up *********" + seekRecord.node.key);
+            cleanup(seekRecord.fset, seekRecord.node);
             return insert(key, tid);
         } else {
             reportInsert(tid, node, node.key);
             return false;
         }
         } else {
-            if ((newNode = insert_old(key)) != null) {
+            if ((newNode = insert_old(seekRecord.fset, key)) != null) {
             reportInsert(tid, newNode, newNode.key);
             return true;
         } else {
@@ -105,16 +110,17 @@ class CHashSet implements SetInterface
         } 
     }
     
-    public void cleanup(HashNode node) {
+    // physically remove node from fset
+    public void cleanup(FSet fset, HashNode node) {
         // the while loop which guarantees the removal of node is hidden in invokeDelete. 
-        apply(false, node.key, node);
+    	apply(false, fset, node, node.key);
     }
 
-    public HashNode insert_old(int key)
+    public HashNode insert_old(FSet b, int key)
     {
         HNode h = head;
         
-        DummyWrapper result = apply(true, key, null);
+        DummyWrapper result = apply(true, b, null, key);
         if (Math.abs(result.retVal) > 2) { // check if resizing is needed due to increased size
             resize(h, true);
         }
@@ -123,38 +129,40 @@ class CHashSet implements SetInterface
 
     public boolean delete(int key, int tid)
     {
-	HashNode node = seek(key);
-	boolean result = false;
-
-	if (node == null) {// node node found
-	    return false;
-	} else {
-	    result = node.frameMark.compareAndSet(0,1);
-	    reportDelete(tid, node, node.key);
-	    cleanup(node);
-	    if (result == true) {
-	        return true;
-	    } else {
-	        return delete(key, tid);
-	    }
-	}
+    	DummyWrapper seekRecord = seek(key);
+        HashNode node = seekRecord.node;
+		boolean result = false;
+	
+		if (node == null) {// node node found
+		    return false;
+		} else {
+		    result = node.frameMark.compareAndSet(0,1);
+		    reportDelete(tid, node, node.key);
+		    cleanup(seekRecord.fset, node);
+		    if (result == true) {
+		        return true;
+		    } else {
+		        return delete(key, tid);
+		    }
+		}
     }
 
     public boolean search(int key, int tid)
     {
-	HashNode node = seek(key);
+    	DummyWrapper seekRecord = seek(key);
+        HashNode node = seekRecord.node;
 
         if (node != null) { // node found
             if (isFrameMarked(node)) { // the node is flagged
 	        reportDelete(tid, node, node.key);
-		return false;
+	        return false;
             } else {
-		reportInsert(tid, node, node.key);
-		return true;
+            	reportInsert(tid, node, node.key);
+            	return true;
             }
         } else { // node not found
             return false;
-	}
+        }
     }
 
     /*
@@ -204,20 +212,17 @@ class CHashSet implements SetInterface
     }
 */
     // key will be passed on insert and node will be passed on cleanup (delete)
-    private DummyWrapper apply(boolean insert, int key, HashNode node)
+    private DummyWrapper apply(boolean insert, FSet b, HashNode node, int key)
     {
         DummyWrapper ret = null;
+        HNode t = head;
+        int i = key % t.size;
         while (true) {
-            HNode       t = head;
-            int         i = key % t.size;
-            FSet b = t.buckets.get(i);
-
             // if the b is empty, help finish resize
-            if (b == null)
+            if (b == null) {
                 helpResize(t, i);
-            // otherwise enlist at b
-            else {
-                    if (insert) {    
+            } else { // otherwise enlist at b
+                if (insert) {    
                     ret = b.invokeInsert(key);
                 } else {
                     ret = b.invokeDelete(node);
@@ -225,6 +230,9 @@ class CHashSet implements SetInterface
                 if (ret.retVal != 0) { // if operation did not fail because of freezing
                     return ret;
                 }
+                t = head;
+                i = key % t.size;
+                b = t.buckets.get(i);
             }
         }
     }

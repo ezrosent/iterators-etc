@@ -56,7 +56,7 @@ class FSet
     public DummyWrapper invokeInsert(int key)
     {
 	Object h = head;
-	DummyWrapper ret = null;
+	DummyWrapper ret = new DummyWrapper();
 	if (h instanceof HashNode []) {
 	    HashNode [] o = (HashNode [])h;
 	    ret = arrayInsert(o, key);
@@ -78,20 +78,36 @@ class FSet
     public DummyWrapper invokeDelete(HashNode node)
     {
 	Object h = head;
-	DummyWrapper ret = null;
+	DummyWrapper ret = new DummyWrapper();
 	while (h instanceof HashNode []) {
 	    HashNode [] o = (HashNode [])h;
-	    ret = arrayRemove(o, node.key);
+	    
+	    // check that node still exists in FSet
+	    boolean found = false;
+	    for (int i = 0; i < o.length; i++) {
+	    	if (o[i] == node) {
+	    		found = true;
+	    		break;
+	    	}
+	    }
+	    if (!found) {
+	    	ret.retVal = 1;
+	    	return ret;
+	    }
+	    
+	    // if exists, try to remove it
+	    ret = arrayRemove(o, node);
 	    HashNode [] n = ret.arr;
 	    ret.arr = null;
-	    if (ret.node != node) {
+	    /*if (ret.node != node) {
 	        ret.retVal = 1; // return any non-zero value to signal success
-		return ret;
-	    }
+	        return ret;
+	    }*/
 	    if (casHead(h, n)) {		    
-		ret.retVal =  1;
-		return ret;
+	    	ret.retVal =  1;
+	    	return ret;
 	    }
+	    h = head;
 	}
 	ret.retVal = 0;
 	return ret;	
@@ -245,25 +261,19 @@ class FSet
 	return ret;
     }
 
-    // TODO: take one more parameter, say LFArrayFSetNode node
-    // this parameter returns the node which is being deleted
-    private static DummyWrapper arrayRemove(HashNode [] o, int key)
+    // Invariant: is always called with node being present in o
+    private static DummyWrapper arrayRemove(HashNode [] o, HashNode node)
     {
 		DummyWrapper ret = new DummyWrapper();
-		HashNode node;
 		HashNode [] n = new HashNode[o.length - 1];
 		
 		int j = 0;
 		
 		ret.arr = n;
-		ret.node = null;
-
 		// copy all but the node to be deleted
 		for (int i = 0; i < o.length; i++) {
-			if (o[i].key != key) {
+			if (o[i] != node) {
 				n[j++] = o[i];
-			} else {
-			    ret.node = o[i];
 			}
 		}
 		return ret;
