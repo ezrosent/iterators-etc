@@ -330,7 +330,8 @@ class CHashSet implements SetInterface
             // iterate b
                         //System.out.println("Bucket size: " + ((Node [])(b.head)).length);
             for (int j = 0; j < ((HashNode [])(b.head)).length; j++) {
-                sc.AddNode(((HashNode [])(b.head))[j], ((HashNode [])(b.head))[j].key);
+		if (!isFrameMarked((HashNode [])(b.head))[j]
+                    sc.AddNode(((HashNode [])(b.head))[j], ((HashNode [])(b.head))[j].key);
                 //System.out.println("Succesfully added "+ ((Node [])(b.head))[j].key);
             }
         }

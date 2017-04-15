@@ -20,8 +20,8 @@ ALGS = ["hash"]#, "ubst", "ubst_unop"]#, "list"]
 ITERATORS_NUM = [2]#1, 2, 3, 4, 5, 6, 7] # Compare against 0
 UPDATERS_NUM = [3]#1, 3, 5, 7, 9]#, 11, 13, 15]
 DURATION = [2]
-PERCENTAGES = [(25, 25, 50)]#, (50, 50, 0)]
-RANGE_SIZE = [(4096, 2048)]#, (16384, 8192)]#, (65536, 32768)]
+PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
+RANGE_SIZE = [(4096, 2048), (16384, 8192)]#, (65536, 32768)]
 runs = 1
 
 op_prefix = "op_file"
@@ -94,6 +94,9 @@ for param in itertools.product(*PARAMETER_COMBINATIONS):
 			pTest0 = Popen(makeargs(param, alg, 0, "orig"), stdout=PIPE, stderr=PIPE)
 			out0, err0 = pTest0.communicate()
 			result0 = int(out0.strip().split("+")[0]) # without iterators
+			temp = 	makeargs(param, alg, param[0], "iter/" + alg)
+			temp2 = " ".join(temp)
+			print temp2
 			pTest1 = Popen(makeargs(param, alg, param[0], "iter/" + alg), stdout=PIPE, stderr=PIPE)
 			out1, err1 = pTest1.communicate()
 			temp = out1.strip().split("+")

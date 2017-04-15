@@ -377,7 +377,7 @@ public class BinarySearchTree implements SetInterface
         AtomicStampedReference<TreeNode> leftChild = node.getReference().left;
         AtomicStampedReference<TreeNode> rightChild = node.getReference().right;
         if ((leftChild.getReference() == null) && (rightChild.getReference() == null)) { // found a leaf
-            if (!isFlagged(node)) {
+            if (!isFrameMarked(node)) {
                 sc.AddNode(node.getReference(), node.getReference().key);
             }
             return;
