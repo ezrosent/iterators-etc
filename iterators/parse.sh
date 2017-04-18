@@ -5,6 +5,6 @@
 
 grep -vwF '(65536,32768)' output.txt | grep -vwF '(4096,2048)' | grep -Ev '^2|^4|^6' > parse_updater_output.txt
 grep -vwF '(65536,32768)' output.txt | grep -vwF '(16384,8192)' | grep -Ev '^2|^4|^6' > parse_updater_com_output.txt
-grep -vwF '(65536,32768)' output.txt | grep -vwF '(4096,2048)' | grep -vwF '9' > parse_iterator_output.txt
-grep -vwF '(65536,32768)' output.txt | grep -vwF '(16384,8192)' | grep -vwF '9' > parse_iterator_com_output.txt
+grep -vwF '(65536,32768)' output.txt | grep -vwF '(4096,2048)' | grep -v '	9	' > parse_iterator_output.txt
+grep -vwF '(65536,32768)' output.txt | grep -vwF '(16384,8192)' | grep -v '	9	' > parse_iterator_com_output.txt
 
