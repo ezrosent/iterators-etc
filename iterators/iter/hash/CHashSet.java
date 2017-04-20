@@ -343,8 +343,8 @@ class CHashSet implements SetInterface
     public SnapCollector<HashNode> GetSnapshot(int tid) {
         SnapCollector<HashNode> sc = AcquireSnapCollector();
         CollectSnapshot(sc);
-        sc.Prepare(tid);
-        sc.PrepareSnapshotNodes(tid);
+        //sc.Prepare(tid);
+        //sc.PrepareSnapshotNodes(tid);
         return sc;
     }
 
@@ -362,7 +362,7 @@ class CHashSet implements SetInterface
     }
 
     // Calculates size via iteration.
-    public int size(int tid) {
+    /*public int size(int tid) {
         SnapCollector<HashNode> snap = GetSnapshot(tid);
         int result = 0;
         HashNode curr;
@@ -370,18 +370,21 @@ class CHashSet implements SetInterface
             result++;
         }
         return result;
-    }
+    }*/
 
     // iterator: calculates the nodes in the list via iteration
     public List<Integer> iterate(int tid) {
-        List<Integer> list = new ArrayList<Integer>();
+        //List<Integer> list = new ArrayList<Integer>();
 
         SnapCollector<HashNode> snap = GetSnapshot(tid);
-        HashNode curr;
-        while ((curr = snap.GetNext(tid)) != null) {
-            list.add(curr.key);
-        }
-        return list;
+        //HashNode curr;
+
+	return (snap.PrepareSnapshot());
+
+        //while ((curr = snap.GetNext(tid)) != null) {
+        //    list.add(curr.key);
+        //}
+        //return list;
     }
 
 

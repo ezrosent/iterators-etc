@@ -1,20 +1,32 @@
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
-
 
 public class SnapCollector<T> {
 
 	// tids are expected to be 0...NUM_THREADS-1
 	static int NUM_THREADS = 64;
 	
-	class NodeWrapper<V> {
+	/*class NodeWrapper<V> {
 		V node;
 		AtomicReference<NodeWrapper<V>> next = new AtomicReference<NodeWrapper<V>>(null);
 		int key;
+	}*/
+
+	class NodeWrapper<V> implements Comparable{
+	    V node;
+	    AtomicReference<NodeWrapper<V>> next = new AtomicReference<NodeWrapper<V>>(null);
+	    int key;
+	    
+	    public int compareTo(Object arg0) {
+		NodeWrapper<V> other = (NodeWrapper<V>)arg0;
+		if ((this.key == Integer.MIN_VALUE) || (other.key == Integer.MAX_VALUE)){
+		    return -1;
+		} else if ((other.key == Integer.MIN_VALUE) || (this.key == Integer.MAX_VALUE)) {					
+		    return 1;
+		}
+		return other.key - this.key;
+	    }
 	}
 	
 	ReportItem[] reportHeads;
@@ -29,7 +41,6 @@ public class SnapCollector<T> {
 	public SnapCollector() {
 		head = new NodeWrapper<T>(); // sentinel head.
 		head.key = Integer.MIN_VALUE;
-		head.node = null;
 		tail = new AtomicReference<NodeWrapper<T>>(head);
 		active = true;
 		
@@ -47,25 +58,45 @@ public class SnapCollector<T> {
 
 	// Implemented according to the optimization in A.3:
 	// Only accept nodes whose key is higher than the last, and return the last node.
+	// TODO: returned value is not used anywhere. Change the code to return void
 	public T AddNode(T node, int key) {
-		T uselessNode = node;
-		NodeWrapper<T> newNode = new NodeWrapper<T>();
-		newNode.node = node;
-		newNode.key = key;
-		while(true) {
-		    NodeWrapper<T> last = tail.get();
-		    if (last == blocker_snapshot) // trying to add an out of place node.
-			    return uselessNode;
-		    newNode.next.set(last);
-		    if (tail.compareAndSet(last, newNode)) {
-			    return uselessNode;
+	    NodeWrapper<T> last;
+	    T useless = node;
+	    
+	    NodeWrapper<T> newNode = new NodeWrapper<T>();
+    	    newNode.node = node;
+	    newNode.key = key;
+	    
+	/*    while (true) {
+		last = tail.get();										
+		if (last.next.get() != null) {
+		    if (last == tail.get()) {
+			tail.compareAndSet(last, last.next.get());
 		    }
+		}													
+		last = tail.get();
+		if (last.next.compareAndSet(null, newNode)) {
+		    tail.compareAndSet(last, newNode);
+		    break; // break only if node is added
 		}
+	    }
+	    return useless;
+	    */
+
+	    while(true) {
+		last = tail.get();		
+		if (last == blocker_snapshot) {
+		    return useless;
+		}
+		newNode.next.set(last);
+		if (tail.compareAndSet(last, newNode)) {
+		    return useless;
+		}
+	    }
 	}
 	
 	public void Report(int tid, T Node, ReportType t, int key) {
 		ReportItem tail = reportTails[tid];
-	//	assert(Node != null);
 		ReportItem newItem = new ReportItem(Node, t, key);
 		if (tail.next.compareAndSet(null, newItem))
 			reportTails[tid] = newItem;
@@ -76,7 +107,12 @@ public class SnapCollector<T> {
 	}
 	
 	public void BlockFurtherPointers() {
-		// I think this makes it idempotent
+	/*	
+		NodeWrapper<T> blocker = new NodeWrapper<T>();
+		blocker.node = null;
+		blocker.key = Integer.MAX_VALUE; 
+		tail.set(blocker);
+	*/
 		blocker_snapshot.next.compareAndSet(null, tail.get());
 		tail.set(blocker_snapshot);
 	}
@@ -101,76 +137,19 @@ public class SnapCollector<T> {
 		return reportHeads;
 	}
 	
-	public List<Integer> PrepareSnapshot() {
-	    // Create a local hash map
-	    // TODO: add counters to individual report lists and snapshot list to avoid resizing here
-	    HashMap<HashNode, ReportType> hashMap = new HashMap<HashNode, ReportType>();
-	    ReportType t;
-
-	    // hash the reports from all the report lists into the hash map
-	    ReportItem curr;
-	    for ( int i = 0; i < NUM_THREADS; i++) {
-		// start with curr->next because first is a dummy item
-	        curr = reportHeads[i].next.get();
-		while (curr != null && curr != blocker) {
-		    // check if hashmap already contains the curr node
-		    // if it contains, check if 
-		    // curr is a delete report and the old node is an insert report
-		    // if yes, change the report to be a delete report
-		    // in the other 3 cases, nothing has to be done
-		    if (hashMap.containsKey((HashNode)curr.node)) {
-		        t = hashMap.get((HashNode)curr.node);
-			if ((curr.t == ReportType.remove) && (t == ReportType.add)) {
-		            //if (curr.node == null)
-			      //  System.out.println("** Inserted a null in 1 **");
-			    hashMap.put((HashNode)curr.node, ReportType.remove);
-			}	
-		    } else {
-		    	//if (curr.node == null)
-			  //  System.out.println("** Inserted a null in 2, report list = " + i + "**");
-		        hashMap.put((HashNode)curr.node, curr.t);
-		    }
-		    curr = curr.next.get();
-		}
-	    }
-
-	    // hash the nodes from snapshot list into the hashMap
-	   // assert(tail.get().node == null);
-	    NodeWrapper<T> localTail = tail.get().next.get();
-	    while (localTail.next.get() != null) {
-		HashNode currentNode = (HashNode)localTail.node; 
-		// if the node is not present, add it to the hashMap
-		if (!hashMap.containsKey(currentNode)) {
-		  //  if (currentNode == null)
-		//	System.out.println("** Inserted a null in 3**");
-		    hashMap.put(currentNode, ReportType.add);
-		}
-	        localTail = localTail.next.get();
-	    }
-
-	    // At this point all the lists have been hashed in the hash map
-     	    // Remove the nodes with report type remove as they should not be added to the final snapshot
-	    List<Integer> list = new ArrayList<Integer>(); // finalSnapshot stored here
-	    Set<HashNode> keys = hashMap.keySet(); 
-
-	    for (HashNode key : keys) {
-	        if (hashMap.get(key) == ReportType.add) {
-		    list.add(key.key);
-		}
-	    }
-	    return list;
-	}	
-/*	
+	
+	
 	// What follows is functions that are used to work with the snapshot while it is
 	// already taken. These functions are used to iterate over the nodes of the snapshot.
 	Object[] currLocations = new Object[NUM_THREADS];
 	int[] currRepLocations = new int[NUM_THREADS];
 	AtomicReference<ArrayList<CompactReportItem>> gAllReports = 
 			new AtomicReference<ArrayList<CompactReportItem>>(null);
-		
+	AtomicReference<NodeWrapper<T>> gSortedSnapshot = new AtomicReference<NodeWrapper<T>>(null);	
+
 	// An optimization: sort the reports and nodes.
 	public void Prepare(int tid) {
-		currLocations[tid] = head;
+		//currLocations[tid] = head;
 		currRepLocations[tid] = 0;
 		if (gAllReports.get() != null)
 			return;
@@ -178,11 +157,12 @@ public class SnapCollector<T> {
 		ArrayList<CompactReportItem> allReports = new ArrayList<CompactReportItem>();
 		for (int i = 0; i < NUM_THREADS; i++) {
 			AddReports(allReports, reportHeads[i]);
-			if (gAllReports.get() != null) {
-			    return;
-			}
+			if (gAllReports.get() != null)
+				return;
 		}
 		Collections.sort(allReports);
+		//System.out.println("How many reports you ask?" + allReports.size());
+		gAllReports.compareAndSet(null, allReports);
 		return;
 	}
 	
@@ -195,8 +175,59 @@ public class SnapCollector<T> {
 		}
 	}
 
+	// Sorts and removes duplicates from the snapshot list
+	// TODO: can be improved a lot -- right now all the threads are creating their own snapshots
+	// by merging reports to their snapshot list
+	public void PrepareSnapshotNodes(int tid) {
+	    //System.out.println(gSortedSnapshot.get());
+	    if (gSortedSnapshot.get() != null) {
+		currLocations[tid] = gSortedSnapshot.get();
+	    } else {
+		ArrayList<NodeWrapper<T>> sortedSnapshotNodes = new ArrayList<NodeWrapper<T>>();
+		// create a local copy of snapshot nodes in an array (unsorted)
+		AddSnapshotNodes(sortedSnapshotNodes, tail.get());
+		// sort the nodes
+		Collections.sort(sortedSnapshotNodes);
+		ArrayList<NodeWrapper<T>> snapshotNodes = new ArrayList<NodeWrapper<T>>();
+		// remove the duplicates based on the key // TODO: source of error??
+		RemoveDuplicates(snapshotNodes, sortedSnapshotNodes);
+		NodeWrapper<T> localSnapshot = CreateLinkedList(snapshotNodes);
+		gSortedSnapshot.compareAndSet(null, localSnapshot);
+		currLocations[tid] = gSortedSnapshot.get();
+	    }
+	}
+
+	private void AddSnapshotNodes(ArrayList<NodeWrapper<T>> snapshotNodes, NodeWrapper<T> localHead) {
+	    NodeWrapper<T> tempNode;
+	    while(localHead != null) {
+		tempNode = new NodeWrapper<T>();
+		tempNode.key = localHead.key;
+		tempNode.node = localHead.node;
+		snapshotNodes.add(tempNode);
+		localHead = localHead.next.get();
+	    }
+	}
+
+	private void RemoveDuplicates(ArrayList<NodeWrapper<T>> snapshotNodes, ArrayList<NodeWrapper<T>> sortedSnapshotNodes) {
+	    snapshotNodes.add(sortedSnapshotNodes.get(0));
+	    for (int i = 1; i < sortedSnapshotNodes.size(); i++) {
+		if (sortedSnapshotNodes.get(i).key != sortedSnapshotNodes.get(i-1).key) {
+		    snapshotNodes.add(sortedSnapshotNodes.get(i));
+    		}	
+	    }
+	}
+
+	private NodeWrapper<T> CreateLinkedList(ArrayList<NodeWrapper<T>> snapshotNodes) {
+	    NodeWrapper<T> first = snapshotNodes.get(0);
+	    NodeWrapper<T> last = first; 
+	    for (int i = 1; i < snapshotNodes.size(); i++)  {
+		last.next.set(snapshotNodes.get(i));
+	        last = last.next.get();
+	    }
+	    return first;
+	}
+						
 	public T GetNext(int tid) {
-		//System.out.println("hello");
 		NodeWrapper<T> currLoc = (NodeWrapper<T>)currLocations[tid];
 		int currRepLoc = currRepLocations[tid];
 		ArrayList<CompactReportItem> allReports = gAllReports.get();
@@ -315,6 +346,6 @@ public class SnapCollector<T> {
 			}
 		}
 	}
-*/
+
 }
 

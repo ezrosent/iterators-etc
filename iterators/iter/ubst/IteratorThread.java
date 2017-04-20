@@ -1,3 +1,5 @@
+import java.util.List;
+
 class IteratorThread extends Thread {
     private int id;
     public int iterations;
@@ -13,7 +15,8 @@ class IteratorThread extends Thread {
         while (!Bench.begin);
 
         while (!Bench.stop) {
-            set.iterate(id);
+            List<Integer> list = set.iterate(id);
+	    //System.out.println("thread " + id + " snapshot " + list.toString());
             iterations += 1;
         }
     }

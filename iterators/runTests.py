@@ -16,12 +16,12 @@ def to_str(data):
 		return_str += (','.join(map(str, data))).strip(',') + ')'
 		return return_str
 
-ALGS = ["hash"]#, "ubst", "ubst_unop"]#, "list"] 
-ITERATORS_NUM = [2]#1, 2, 3, 4, 5, 6, 7] # Compare against 0
-UPDATERS_NUM = [3]#1, 3, 5, 7, 9]#, 11, 13, 15]
+ALGS = ["hash", "hash_unop", "ubst", "ubst_unop"]#, "list"] 
+ITERATORS_NUM = [1, 2]#, 3, 4, 5, 6, 7] # Compare against 0
+UPDATERS_NUM = [3]#[1, 3, 5, 7, 9]#, 11, 13, 15]
 DURATION = [2]
-PERCENTAGES = [(25, 25, 50), (50, 50, 0)]
-RANGE_SIZE = [(4096, 2048), (16384, 8192)]#, (65536, 32768)]
+PERCENTAGES = [(25, 25, 50)]#, (50, 50, 0)]
+RANGE_SIZE = [(4096, 2048)]#, (16384, 8192)]#, (65536, 32768)]
 runs = 1
 
 op_prefix = "op_file"

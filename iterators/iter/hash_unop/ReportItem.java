@@ -16,7 +16,7 @@ class ReportItem {
 		this.key = key;
 	}
 }
-/*
+
 class CompactReportItem implements Comparable{
 	Object node;
 	ReportType t;
@@ -43,4 +43,4 @@ class CompactReportItem implements Comparable{
 			return this.node.hashCode() - other.node.hashCode();
 		return this.t.ordinal() - other.t.ordinal();
 	}
-}*/
+}
